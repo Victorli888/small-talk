@@ -1,5 +1,6 @@
 import { Signal, useSignal } from "@preact/signals";
 import { Message } from "./MessageHistory.tsx";
+import { Button } from "../components/Button.tsx";
 
 interface MessageInputProps {
     messages: Signal<Message[]>;
@@ -33,12 +34,7 @@ export default function MessageInput({ messages }: MessageInputProps) {
                     }
                 }}
             />
-            <button
-                onClick={handleSend}
-                class="bg-blue-500 text-white px-5 py-2 rounded-r-lg hover:bg-blue-500"
-            >
-                Send
-            </button>
+            <Button onClick={handleSend}>Send</Button>
         </div>
     );
 }
