@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 import Counter from "../islands/Counter.tsx";
-import MessageHistory, { Message } from "../components/MessageHistory.tsx";
+import MessageHistory, { Message } from "../islands/MessageHistory.tsx";
 import MessageInput from "../islands/MessageInput.tsx";
 
 export default function Home() {

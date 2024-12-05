@@ -4,8 +4,9 @@
 .env.test.local
 .env.production.local
 .env.local
-
+.idea
 # Fresh build directory
 _fresh/
+fresh.gen.ts
 # npm dependencies
 node_modules/
