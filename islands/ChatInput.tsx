@@ -1,11 +1,11 @@
 import { Signal, useSignal } from "@preact/signals";
-import { Message } from "./MessageHistory.tsx";
+import { Message } from "./ChatHistory.tsx";
 
 interface MessageInputProps {
     messages: Signal<Message[]>;
 }
 
-export default function MessageInput({ messages }: MessageInputProps) {
+export default function ChatInput({ messages }: MessageInputProps) {
     const message = useSignal('');
 
     const handleSend = () => {
