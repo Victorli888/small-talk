@@ -5,8 +5,11 @@
 .env.production.local
 .env.local
 .idea
-# Fresh build directory
+# Unecessary Fresh Files
 _fresh/
 fresh.gen.ts
 # npm dependencies
 node_modules/
+
+# Files That don't need to be tracked
+islands/ChatHistoryTwoo.tsx
