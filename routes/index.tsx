@@ -1,6 +1,7 @@
 import { useSignal } from "@preact/signals";
 import ChatHistory, { ChatMessage, PhraseSet } from "../islands/ChatHistory.tsx";
 import ChatInput from "../islands/ChatInput.tsx";
+import ChatSuggestions from "../islands/ChatSuggestion.tsx";
 
 export default function Home() {
     const messages = useSignal<ChatMessage[]>([]);
@@ -29,6 +30,9 @@ export default function Home() {
                         onPhraseSetFetched={handlePhraseSetFetched}
                     />
                     <ChatInput
+                        messages={messages}
+                    />
+                    <ChatSuggestions
                         messages={messages}
                     />
                 </div>
