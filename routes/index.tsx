@@ -1,7 +1,7 @@
 import { useSignal } from "@preact/signals";
 import Counter from "../islands/Counter.tsx";
-import MessageHistory, { Message } from "../islands/MessageHistory.tsx";
-import MessageInput from "../islands/MessageInput.tsx";
+import ChatHistory, { Message } from "../islands/ChatHistory.tsx";
+import ChatInput from "../islands/ChatInput.tsx";
 
 export default function Home() {
   const count = useSignal(3);
@@ -17,7 +17,7 @@ export default function Home() {
               height="128"
               alt="the Fresh logo: a sliced lemon dripping with juice"
           />
-          <h1 class="text-4xl font-bold">You're Welcome To Small Talk</h1>
+          <h1 class="text-4xl font-bold">Let's Make Small Talk</h1>
           {/*<p class="my-4">*/}
           {/*  Try updating this message in the*/}
           {/*  <code class="mx-2">./routes/index.tsx</code> file, and refresh.*/}
@@ -26,8 +26,8 @@ export default function Home() {
 
           {/* Chat Component */}
           <div class="w-full max-w-md mt-8 border rounded-lg shadow-lg">
-            <MessageHistory messages={messages} />
-            <MessageInput messages={messages} />
+            <ChatHistory messages={messages} />
+            <ChatInput messages={messages} />
           </div>
         </div>
       </div>

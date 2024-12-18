@@ -1,12 +1,11 @@
 import { Signal, useSignal } from "@preact/signals";
-import { Message } from "./MessageHistory.tsx";
-import { Button } from "../components/Button.tsx";
+import { Message } from "./ChatHistory.tsx";
 
 interface MessageInputProps {
     messages: Signal<Message[]>;
 }
 
-export default function MessageInput({ messages }: MessageInputProps) {
+export default function ChatInput({ messages }: MessageInputProps) {
     const message = useSignal('');
 
     const handleSend = () => {
@@ -34,7 +33,12 @@ export default function MessageInput({ messages }: MessageInputProps) {
                     }
                 }}
             />
-            <Button onClick={handleSend}>Send</Button>
+            <button
+                onClick={handleSend}
+                class="bg-blue-500 text-white px-5 py-2 rounded-r-lg hover:bg-blue-500"
+            >
+                Send
+            </button>
         </div>
     );
 }
