@@ -13,3 +13,6 @@ node_modules/
 
 # Files That don't need to be tracked
 islands/ChatHistoryTwoo.tsx
+islands/ChatInputTwo.tsx
+routes/api/phrases2.ts
+cantoDB/.DS_Store

@@ -1,13 +1,18 @@
 import { type Handlers } from "https://deno.land/x/fresh@1.7.3/server.ts";
 import { Client } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
-import {Message} from "../../islands/ChatHistory.tsx";
-// Add this to your database connection file
 import "https://deno.land/x/dotenv@v3.2.2/load.ts";
 
-export interface QuestionPhrase extends Message {
-    id: number;
+export interface PhraseData {
+    phrase_id: number;
     chinese_translation: string;
+    english_translation: string;
     root_question_id: number | null;
+}
+
+// aggregated result of Question and its responses data
+export interface PhraseSet {
+    question: PhraseData;
+    responses: PhraseData[];
 }
 
 export const handler: Handlers<Response> = {
@@ -21,17 +26,14 @@ export const handler: Handlers<Response> = {
         });
 
         try {
-            // Connect to the database
             await client.connect();
-
-            // Execute the specific query you mentioned
             const result = await client.queryObject<QuestionPhrase>`
-        SELECT *
-        FROM phrases
-        WHERE root_question_id IS NULL
-        ORDER BY RANDOM()
-        LIMIT 1
-      `;
+                SELECT *
+                FROM phrases
+                WHERE root_question_id IS NULL
+                ORDER BY RANDOM()
+                LIMIT 1
+            `;
 
 
             /* TODO: Create a new table inside small_talk_db to keep track of fetched question
@@ -73,28 +75,52 @@ export const handler: Handlers<Response> = {
       }
              */
 
-            // Check if we got a result
             if (result.rows.length === 0) {
-                return new Response(JSON.stringify({ message: "No questions found" }), {
+                return new Response(JSON.stringify({message: "No questions found"}), {
                     status: 404,
-                    headers: { 'Content-Type': 'application/json' }
+                    headers: {'Content-Type': 'application/json'}
                 });
             }
 
-            // Return the first (random) question phrase
-            return new Response(JSON.stringify(result.rows[0]), {
+            const question = result.rows[0];
+            const responsesResult = await client.queryObject<Response>`
+                SELECT *
+                FROM phrases
+                WHERE root_question_id = ${question.phrase_id}
+            `;
+            const phraseSet: PhraseSet = {
+                question: question,
+                responses: responsesResult.rows
+            };
+
+            return new Response(JSON.stringify(phraseSet), {
                 headers: { 'Content-Type': 'application/json' }
             });
         } catch (error) {
-            // Handle any database errors
             console.error('Database error:', error);
-            return new Response(JSON.stringify({ error: 'Failed to fetch question' }), {
+            return new Response(JSON.stringify({ error: 'Failed to fetch question and responses', details: error.message }), {
                 status: 500,
                 headers: { 'Content-Type': 'application/json' }
             });
         } finally {
-            // Always close the database connection
             await client.end();
         }
     }
 };
+
+//             // return new Response(JSON.stringify(result.rows[0]), {
+//             //     headers: { 'Content-Type': 'application/json' }
+//             // });
+//         } catch (error) {
+//             // Handle any database errors
+//             console.error('Database error:', error);
+//             return new Response(JSON.stringify({ error: 'Failed to fetch phrases' }), {
+//                 status: 500,
+//                 headers: { 'Content-Type': 'application/json' }
+//             });
+//         } finally {
+//             // Always close the database connection
+//             await client.end();
+//         }
+//     }
+// };

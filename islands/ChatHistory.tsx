@@ -1,45 +1,58 @@
-import { Signal } from "@preact/signals";
-import { useEffect, useState } from "preact/hooks";
+import { Signal, signal } from "@preact/signals";
+import { useEffect } from "preact/hooks";
+import { PhraseSet, PhraseData } from "../routes/api/phrases.ts"
 
-export interface Message {
+export interface ChatMessage {
     text: string;
     timestamp: string;
 }
 
-interface QuestionPhrase extends Message {
-    phrase_id: number;
-    chinese_translation: string;
-    english_translation: string;
-    root_question_id: number | null;
+export interface ChatHistoryProps {
+    messages: Signal<ChatMessage[]>;
+    onPhraseSetFetched?: (phraseSet: PhraseSet) => void;
 }
 
-interface SentChatProps {
-    messages: Signal<Message[]>;
-}
+// Speaker A  Asks Questions, Speaker B will respond
+export const speakerAPhrase = signal<PhraseData | null>(null);
+export const speakerBPhrases = signal<PhraseData[]>([]);
 
-export default function ChatHistory({ messages }: SentChatProps) {
+export default function ChatHistory({ messages, onPhraseSetFetched }: ChatHistoryProps) {
     useEffect(() => {
-        async function fetchQuestionPhrase() {
+        async function fetchPhraseSet() {
             try {
                 const response = await fetch('/api/phrases');
                 if (!response.ok) {
-                    throw new Error('Failed to fetch question phrase');
+                    throw new Error('Failed to fetch phrase set');
                 }
-                const data: QuestionPhrase = await response.json();
+                const data: PhraseSet = await response.json();
 
+                speakerAPhrase.value = data.question;
+                speakerBPhrases.value = data.responses;
 
-                const questionMessage: Message = {
-                    text: data.chinese_translation,
+                const questionMessage: ChatMessage = {
+                    text: data.question.chinese_translation,
                     timestamp: new Date().toISOString()
                 };
 
-
                 messages.value = [questionMessage, ...messages.value];
+
+                if (onPhraseSetFetched) {
+                    onPhraseSetFetched(data);
+                }
+
+                console.log(`Successfully fetched question:`, data.question.chinese_translation);
+                data.responses.forEach((response, i) => {
+                    console.log(`Successfully fetched response: ${i + 1}`, response.chinese_translation);
+                });
             } catch (error) {
-                console.error('Error fetching question phrase:', error);
+                console.error('Error fetching phrase set:', error);
             }
         }
-        fetchQuestionPhrase();
+
+        // Only fetch a phrase set if there are no messages
+        if (messages.value.length === 0) {
+            fetchPhraseSet();
+        }
     }, []);
 
     return (
