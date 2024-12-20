@@ -2,24 +2,15 @@ import { Signal, useSignal } from "@preact/signals";
 import { ChatMessage, speakerBPhrases } from "./ChatHistory.tsx";
 import { useEffect } from "preact/hooks";
 
-interface MessageInputProps {
+interface ChatInputProps {
     messages: Signal<ChatMessage[]>;
 }
 
-export default function ChatInput({ messages }: MessageInputProps) {
+export default function ChatInput({ messages }: ChatInputProps) {
     const message = useSignal('');
     const responseSuggestions = useSignal<ChatMessage[]>([]);
 
-    useEffect(() => {
-        if (speakerBPhrases.value.length > 0) {
-            const suggestionMessages = speakerBPhrases.value.map(response => ({
-                text: response.chinese_translation,
-                timestamp: new Date().toISOString()
-            }));
-
-            responseSuggestions.value = suggestionMessages;
-        }
-    }, [speakerBPhrases.value]);
+    useEffect(() => { }, []);
 
     const handleSend = () => {
         if (message.value.trim()) {
@@ -32,26 +23,22 @@ export default function ChatInput({ messages }: MessageInputProps) {
         }
     };
 
-    const handleSuggestionClick = (suggestion: ChatMessage) => {
-        message.value = suggestion.text;
-    };
 
     return (
-        <div>
-            {/* Response Suggestions */}
-            {responseSuggestions.value.length > 0 && (
-                <div class="flex overflow-x-auto space-x-2 p-2 bg-gray-50">
-                    {responseSuggestions.value.map((suggestion, index) => (
-                        <button
-                            key={index}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full whitespace-nowrap hover:bg-blue-200 transition-colors"
-                        >
-                            {suggestion.text}
-                        </button>
-                    ))}
-                </div>
-            )}
+        //     {/* Response Suggestions */}
+        //     {responseSuggestions.value.length > 0 && (
+        //         <div class="flex overflow-x-auto space-x-2 p-2 bg-gray-50">
+        //             {responseSuggestions.value.map((suggestion, index) => (
+        //                 <button
+        //                     key={index}
+        //                     onClick={() => handleSuggestionClick(suggestion)}
+        //                     class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full whitespace-nowrap hover:bg-blue-200 transition-colors"
+        //                 >
+        //                     {suggestion.text}
+        //                 </button>
+        //             ))}
+        //         </div>
+        //     )}
 
             <div class="flex p-4 bg-gray-100 border-t">
                 <input
@@ -73,6 +60,5 @@ export default function ChatInput({ messages }: MessageInputProps) {
                     Send
                 </button>
             </div>
-        </div>
     );
 }
