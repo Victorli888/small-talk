@@ -1,6 +1,6 @@
 import { Signal, signal, useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
-import { ChatMessage, speakerBPhrases } from "./ChatHistory.tsx";
+import { ChatMessage, speakerBPhrases, fetchNewPhraseSet } from "./ChatHistory.tsx";
 
 interface ChatSuggestionsProps {
     messages: Signal<ChatMessage[]>;
@@ -22,8 +22,17 @@ export default function ChatSuggestions({ messages }: ChatSuggestionsProps) {
         }
     }, [speakerBPhrases.value]);
 
-    const handleSuggestionClick = (suggestion: ChatMessage) => {
+    const handleSuggestionClick = async (suggestion: ChatMessage) => {
+        // Add the selected response to messages
         messages.value = [...messages.value, suggestion];
+
+        // Clear current suggestions
+        responseSuggestions.value = [];
+
+        // Fetch new phrase set after a short delay
+        setTimeout(() => {
+            fetchNewPhraseSet(messages);
+        }, 350);
     };
 
     // If no suggestions, don't render anything
