@@ -8,7 +8,7 @@ interface ChatSuggestionsProps {
 
 export default function ChatSuggestions({ messages }: ChatSuggestionsProps) {
     const responseSuggestions = useSignal<ChatMessage[]>([]);
-    const isOpen = signal(true);
+    const isOpen = useSignal(true);
 
     useEffect(() => {
         if (speakerBPhrases.value.length > 0) {
