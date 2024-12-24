@@ -1,6 +1,5 @@
-// ChatHistory.tsx
 import { Signal, signal } from "@preact/signals";
-import { useEffect } from "preact/hooks";
+import { useEffect, useRef } from "preact/hooks";  // Added useRef
 import { PhraseSet, PhraseData } from "../routes/api/phrases.ts"
 
 export interface ChatMessage {
@@ -48,6 +47,8 @@ export async function fetchNewPhraseSet(messages: Signal<ChatMessage[]>, onPhras
 }
 
 export default function ChatHistory({ messages, onPhraseSetFetched }: ChatHistoryProps) {
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         // Only fetch a phrase set if there are no messages
         if (messages.value.length === 0) {
@@ -55,8 +56,18 @@ export default function ChatHistory({ messages, onPhraseSetFetched }: ChatHistor
         }
     }, []);
 
+    // Added effect for auto-scrolling
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [messages.value]);
+
     return (
-        <div class="flex flex-col space-y-2 p-4 min-h-[200px] bg-white">
+        <div
+            ref={chatContainerRef}
+            class="flex flex-col space-y-2 p-4 h-[400px] overflow-y-auto bg-white"  // Added h-[400px] and overflow-y-auto
+        >
             {messages.value.length === 0 ? (
                 <div class="text-center text-black-500">
                     No messages yet...
