@@ -4,6 +4,7 @@ import {useEffect} from "preact/hooks";
 import AddPhraseModal from "./AddPhrase.tsx";
 import ColoredButton from "../components/ColoredButton.tsx";
 import {AddIcon, DeleteIcon, EditIcon} from "../components/ButtonIcons.tsx";
+import EditPhraseModal from "./EditPhrase.tsx";
 
 interface ChatInputProps {
     messages: Signal<ChatMessage[]>;
@@ -11,7 +12,8 @@ interface ChatInputProps {
 
 export default function PhraseManager({messages}: ChatInputProps) {
     const message = useSignal('');
-    const isPhraseManagerActive = useSignal(false);
+    const isAddPhraseModalActive = useSignal(false);
+    const isEditPhraseModalActive = useSignal(false);
 
     const handleSend = () => {
         if (message.value.trim()) {
@@ -29,13 +31,13 @@ export default function PhraseManager({messages}: ChatInputProps) {
             <div className="flex justify-center items center space-x-6 p-4 bg-gray-100 border-t">
                 <ColoredButton
                     label="Add"
-                    onClick={() => isPhraseManagerActive.value = true}
+                    onClick={() => isAddPhraseModalActive.value = true}
                     color="green"
                     icon={AddIcon}
                 />
                 <ColoredButton
                     label="Edit"
-                    onClick={() => console.log("Edit Clicked")}
+                    onClick={() => isEditPhraseModalActive.value = true}
                     color="blue"
                     icon={EditIcon}
                 />
@@ -48,9 +50,14 @@ export default function PhraseManager({messages}: ChatInputProps) {
             </div>
 
             <AddPhraseModal
-                isOpen={isPhraseManagerActive}
+                isOpen={isAddPhraseModalActive}
                 messages={messages}
             />
+            <EditPhraseModal
+                isOpen={isEditPhraseModalActive}
+                messages={messages}
+            />
+
         </>
     );
 }

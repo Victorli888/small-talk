@@ -91,61 +91,72 @@ function createClient(): Client {
 }
 
 export const handler: Handlers = {
-    // GET handler for fetching random questions and their responses
-    async GET(_req: Request) {
+    // GET Phrase Data by phrase_id from DB
+    async GET(req: Request) {
         const client = createClient();
+        const url = new URL(req.url);
+        const phraseId = url.searchParams.get('id');
 
         try {
             await client.connect();
 
-            // First, get a random question (phrase with no root_question_id)
-            const result = await client.queryObject<PhraseData>`
-                SELECT *
-                FROM phrases
-                WHERE root_question_id IS NULL
-                ORDER BY RANDOM()
-                LIMIT 1
-            `;
+            // If we have a numeric ID in the query params, fetch that specific phrase
+            if (phraseId && !isNaN(Number(phraseId))) {
+                const result = await client.queryObject`
+                    SELECT
+                        phrase_id,
+                        chinese_translation,
+                        english_translation,
+                        theme_id,
+                        complexity_rating,
+                        root_question_id
+                    FROM phrases
+                    WHERE phrase_id = ${Number(phraseId)}
+                `;
 
-            if (result.rows.length === 0) {
-                return new Response(JSON.stringify({message: "No questions found"}), {
-                    status: 404,
-                    headers: {'Content-Type': 'application/json'}
+                if (result.rows.length === 0) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        error: "Phrase not found"
+                    }), {
+                        status: 404,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+
+                return new Response(JSON.stringify({
+                    success: true,
+                    ...result.rows[0]
+                }), {
+                    headers: { "Content-Type": "application/json" }
                 });
             }
 
-            // Then fetch all responses for this question
-            const question = result.rows[0];
-            const responsesResult = await client.queryObject<PhraseData>`
-                SELECT *
-                FROM phrases
-                WHERE root_question_id = ${question.phrase_id}
-            `;
-
-            // Combine question and responses into a PhraseSet
-            const phraseSet: PhraseSet = {
-                question: question,
-                responses: responsesResult.rows
-            };
-
-            return new Response(JSON.stringify(phraseSet), {
-                headers: { 'Content-Type': 'application/json' }
-            });
-        } catch (error) {
-            console.error('Database error:', error);
+            // If no specific ID provided, return 400 error
             return new Response(JSON.stringify({
-                error: 'Failed to fetch question and responses',
+                success: false,
+                error: "Please provide a phrase ID"
+            }), {
+                status: 400,
+                headers: { "Content-Type": "application/json" }
+            });
+
+        } catch (error) {
+            console.error("Database error:", error);
+            return new Response(JSON.stringify({
+                success: false,
+                error: "Failed to fetch phrase",
                 details: error.message
             }), {
                 status: 500,
-                headers: { 'Content-Type': 'application/json' }
+                headers: { "Content-Type": "application/json" }
             });
         } finally {
             await client.end();
         }
     },
 
-    // POST handler for creating new phrases
+    // POST new phrase to DB
     async POST(req: Request) {
         const client = createClient();
 
