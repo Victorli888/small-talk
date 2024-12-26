@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 import ChatHistory, { ChatMessage, PhraseSet } from "../islands/ChatHistory.tsx";
-import ChatInput from "../islands/ChatInput.tsx";
+import PhraseManager from "../islands/PhraseManager.tsx";
 import ChatSuggestions from "../islands/ChatSuggestion.tsx";
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
                         messages={messages}
                     />
 
-                    <ChatInput
+                    <PhraseManager
                         messages={messages}
                     />
 
