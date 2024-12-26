@@ -27,12 +27,15 @@ export default function Home() {
                         messages={messages}
                         onPhraseSetFetched={handlePhraseSetFetched}
                     />
-                    <ChatInput
-                        messages={messages}
-                    />
+
                     <ChatSuggestions
                         messages={messages}
                     />
+
+                    <ChatInput
+                        messages={messages}
+                    />
+
                 </div>
             </div>
         </div>
