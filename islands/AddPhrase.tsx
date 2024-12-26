@@ -22,7 +22,7 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
         status.value = { message: "", isError: false };
 
         try {
-            const response = await fetch("/api/manage-phrases", {
+            const response = await fetch("/api/phrases", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

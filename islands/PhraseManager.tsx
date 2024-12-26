@@ -11,7 +11,7 @@ interface ChatInputProps {
 
 export default function PhraseManager({messages}: ChatInputProps) {
     const message = useSignal('');
-    const isPhraseManagerOpen = useSignal(false);
+    const isPhraseManagerActive = useSignal(false);
 
     const handleSend = () => {
         if (message.value.trim()) {
@@ -29,7 +29,7 @@ export default function PhraseManager({messages}: ChatInputProps) {
             <div className="flex justify-center items center space-x-6 p-4 bg-gray-100 border-t">
                 <ColoredButton
                     label="Add"
-                    onClick={() => isPhraseManagerOpen.value = true}
+                    onClick={() => isPhraseManagerActive.value = true}
                     color="green"
                     icon={AddIcon}
                 />
@@ -48,7 +48,7 @@ export default function PhraseManager({messages}: ChatInputProps) {
             </div>
 
             <AddPhraseModal
-                isOpen={isPhraseManagerOpen}
+                isOpen={isPhraseManagerActive}
                 messages={messages}
             />
         </>
