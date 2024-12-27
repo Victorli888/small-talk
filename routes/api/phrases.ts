@@ -241,5 +241,101 @@ export const handler: Handlers = {
         } finally {
             await client.end();
         }
-    }
+    },
+
+    // PUT updates to an existing phrase in the DB
+    async PUT(req: Request) {
+        const client = createClient();
+
+        try {
+            const phrase: NewPhrase & { phrase_id: number } = await req.json();
+
+            // First validate the incoming data
+            const validation = validatePhrase(phrase);
+            if (!validation.isValid) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    errors: validation.errors
+                }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            await client.connect();
+
+            // Check if the phrase exists
+            const existingPhrase = await client.queryObject`
+            SELECT phrase_id FROM phrases WHERE phrase_id = ${phrase.phrase_id}
+        `;
+
+            if (existingPhrase.rows.length === 0) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "Phrase not found"
+                }), {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // Validate theme and root question if provided
+            if (phrase.theme_id) {
+                const themeExists = await validateThemeExists(client, phrase.theme_id);
+                if (!themeExists) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        errors: ["Specified theme does not exist"]
+                    }), {
+                        status: 400,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+            }
+
+            if (phrase.root_question_id) {
+                const rootExists = await validateRootQuestionExists(client, phrase.root_question_id);
+                if (!rootExists) {
+                    return new Response(JSON.stringify({
+                        success: false,
+                        errors: ["Root question not found"]
+                    }), {
+                        status: 400,
+                        headers: { "Content-Type": "application/json" }
+                    });
+                }
+            }
+
+            // Update the phrase
+            await client.queryObject`
+            UPDATE phrases
+            SET 
+                chinese_translation = ${phrase.chinese_translation},
+                english_translation = ${phrase.english_translation},
+                theme_id = ${phrase.theme_id || null},
+                complexity_rating = ${phrase.complexity_rating || null},
+                root_question_id = ${phrase.root_question_id || null}
+            WHERE phrase_id = ${phrase.phrase_id}
+        `;
+
+            return new Response(JSON.stringify({
+                success: true,
+                message: "Phrase updated successfully"
+            }), {
+                headers: { "Content-Type": "application/json" }
+            });
+
+        } catch (error) {
+            console.error("Error updating phrase:", error);
+            return new Response(JSON.stringify({
+                success: false,
+                error: error.message
+            }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" }
+            });
+        } finally {
+            await client.end();
+        }
+    },
 };
