@@ -5,6 +5,7 @@ import AddPhraseModal from "./AddPhrase.tsx";
 import ColoredButton from "../components/ColoredButton.tsx";
 import {AddIcon, DeleteIcon, EditIcon} from "../components/ButtonIcons.tsx";
 import EditPhraseModal from "./EditPhrase.tsx";
+import DeletePhraseModal from "./DeletePhrase.tsx";
 
 interface ChatInputProps {
     messages: Signal<ChatMessage[]>;
@@ -14,6 +15,7 @@ export default function PhraseManager({messages}: ChatInputProps) {
     const message = useSignal('');
     const isAddPhraseModalActive = useSignal(false);
     const isEditPhraseModalActive = useSignal(false);
+    const isDeletePhraseModalActive = useSignal(false);
 
     const handleSend = () => {
         if (message.value.trim()) {
@@ -43,7 +45,7 @@ export default function PhraseManager({messages}: ChatInputProps) {
                 />
                 <ColoredButton
                     label="Delete"
-                    onClick={() => console.log("Delete Clicked")}
+                    onClick={() => isDeletePhraseModalActive.value = true}
                     color="red"
                     icon={DeleteIcon}
                 />
@@ -55,6 +57,10 @@ export default function PhraseManager({messages}: ChatInputProps) {
             />
             <EditPhraseModal
                 isOpen={isEditPhraseModalActive}
+                messages={messages}
+            />
+            <DeletePhraseModal
+                isOpen={isDeletePhraseModalActive}
                 messages={messages}
             />
 
