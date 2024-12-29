@@ -59,32 +59,52 @@ export default function DeletePhraseModal({ isOpen, messages }: DeletePhraseModa
         }
     };
 
-    // Handle the actual deletion after confirmation
     const handleDelete = async () => {
         try {
-            isLoading.value = true;
-            const response = await fetch(`/api/phrases/${formData.value.phrase_id}`, {
-                method: "DELETE",
+            if (!formData.value.phrase_id) {
+                status.value = { message: "No phrase ID provided", isError: true };
+                return;
+            }
+
+            // Make the delete request using query parameters
+            const response = await fetch(`/api/phrases?id=${formData.value.phrase_id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
             });
 
+            // Parse the response data
             const data = await response.json();
 
-            if (!response.ok) {
+            // Check both the HTTP status and the success flag in the response
+            if (!response.ok || !data.success) {
                 throw new Error(data.error || "Failed to delete phrase");
             }
 
-            status.value = { message: "Successfully deleted phrase", isError: false };
+            // Handle successful deletion with a detailed message
+            let successMessage = "Phrase successfully hidden";
+            if (data.deletedResponses) {
+                successMessage += ` along with ${data.responseCount} associated response${data.responseCount > 1 ? 's' : ''}`;
+            }
 
-            // Close modal after success
+            status.value = {
+                message: successMessage,
+                isError: false
+            };
+
+            // Close modal after success (with a small delay to show the success message)
             setTimeout(() => {
                 isOpen.value = false;
             }, 1500);
 
         } catch (error) {
-            status.value = { message: error.message, isError: true };
-        } finally {
-            isLoading.value = false;
-            showConfirmation.value = false;
+            console.error('Delete operation error:', error);
+            status.value = {
+                message: error instanceof Error ? error.message : "Failed to delete phrase",
+                isError: true
+            };
         }
     };
 
@@ -207,7 +227,6 @@ export default function DeletePhraseModal({ isOpen, messages }: DeletePhraseModa
                         <div class="mt-4">
                             <div class="bg-red-50 text-red-800 p-4 rounded mb-4">
                                 <p class="font-medium">Are you sure you want to delete this phrase?</p>
-                                <p class="text-sm mt-1">This action cannot be undone.</p>
                             </div>
                             <div class="flex space-x-3">
                                 <button

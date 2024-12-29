@@ -12,7 +12,8 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
         english_translation: "",
         theme_id: "",
         complexity_rating: "",
-        root_question_id: ""
+        root_question_id: "",
+        is_hidden: false,
     });
 
     const status = useSignal({ message: "", isError: false });
@@ -31,7 +32,8 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
                     complexity_rating: formData.value.complexity_rating ?
                         parseInt(formData.value.complexity_rating) : undefined,
                     root_question_id: formData.value.root_question_id ?
-                        parseInt(formData.value.root_question_id) : undefined
+                        parseInt(formData.value.root_question_id) : undefined,
+                    is_hidden: formData.value.is_hidden
                 })
             });
 
@@ -161,6 +163,24 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
                                 }}
                                 class="w-full p-2 border rounded"
                             />
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                            <label className="block text-sm font-medium">
+                                Hide
+                            </label>
+                            <input
+                                type="checkbox"
+                                checked={formData.value.is_hidden}
+                                onChange={(e) => formData.value = {
+                                    ...formData.value,
+                                    is_hidden: (e.target as HTMLInputElement).checked
+                                }}
+                                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <span className="text-sm text-gray-500">
+                                (Hidden phrases won't appear in conversations)
+                            </span>
                         </div>
 
                         <div class="flex space-x-3">

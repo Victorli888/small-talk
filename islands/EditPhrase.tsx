@@ -9,12 +9,13 @@ interface EditPhraseModalProps {
 
 export default function EditPhraseModal({ isOpen, messages }: EditPhraseModalProps) {
     const formData = useSignal({
-        phrase_id: "", // Added for editing
+        phrase_id: "",
         chinese_translation: "",
         english_translation: "",
         theme_id: "",
         complexity_rating: "",
-        root_question_id: ""
+        root_question_id: "",
+        is_unhide: false
     });
 
     const status = useSignal({ message: "", isError: false });
@@ -29,8 +30,7 @@ export default function EditPhraseModal({ isOpen, messages }: EditPhraseModalPro
 
         try {
             isLoading.value = true;
-            // Use query parameter instead of path parameter
-            const response = await fetch(`/api/phrases?id=${formData.value.phrase_id}`);
+            const response = await fetch(`/api/phrases?id=${formData.value.phrase_id}&include_hidden=true`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -39,12 +39,13 @@ export default function EditPhraseModal({ isOpen, messages }: EditPhraseModalPro
 
             // Update form with fetched data
             formData.value = {
-                ...formData.value, // Keep the phrase_id
+                ...formData.value,
                 chinese_translation: data.chinese_translation,
                 english_translation: data.english_translation,
                 theme_id: data.theme_id?.toString() || "",
                 complexity_rating: data.complexity_rating?.toString() || "",
-                root_question_id: data.root_question_id?.toString() || ""
+                root_question_id: data.root_question_id?.toString() || "",
+                is_hidden: data.is_hidden || false
             };
 
             status.value = { message: "Phrase loaded successfully", isError: false };
@@ -231,6 +232,24 @@ export default function EditPhraseModal({ isOpen, messages }: EditPhraseModalPro
                                         }}
                                         class="w-full p-2 border rounded"
                                     />
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <label className="block text-sm font-medium">
+                                        Unhide
+                                    </label>
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.value.is_unhide}
+                                        onChange={(e) => formData.value = {
+                                            ...formData.value,
+                                            is_unhide: (e.target as HTMLInputElement).checked
+                                        }}
+                                        className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-gray-500">
+                                    (Select to unhide phrase if hidden)
+                                    </span>
                                 </div>
 
                                 <div class="flex space-x-3">

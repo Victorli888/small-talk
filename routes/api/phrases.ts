@@ -11,6 +11,7 @@ interface NewPhrase {
     theme_id?: number;
     complexity_rating?: number;
     root_question_id?: number;
+    is_hidden?: boolean;
 }
 
 interface PhraseData {
@@ -18,6 +19,7 @@ interface PhraseData {
     chinese_translation: string;
     english_translation: string;
     root_question_id: number | null;
+    is_hidden: boolean;
 }
 
 interface PhraseSet {
@@ -96,22 +98,38 @@ export const handler: Handlers = {
         const client = createClient();
         const url = new URL(req.url);
         const phraseId = url.searchParams.get('id');
+        const includeHidden = url.searchParams.get('include_hidden') === 'true';
 
         try {
             await client.connect();
 
-            // If we have a numeric ID in the query params, fetch that specific phrase
             if (phraseId && !isNaN(Number(phraseId))) {
-                const result = await client.queryObject`
+                // Build the query based on whether we should include hidden phrases
+                const result = includeHidden
+                    ? await client.queryObject`
                     SELECT
                         phrase_id,
                         chinese_translation,
                         english_translation,
                         theme_id,
                         complexity_rating,
-                        root_question_id
+                        root_question_id,
+                        is_hidden
                     FROM phrases
                     WHERE phrase_id = ${Number(phraseId)}
+                `
+                    : await client.queryObject`
+                    SELECT
+                        phrase_id,
+                        chinese_translation,
+                        english_translation,
+                        theme_id,
+                        complexity_rating,
+                        root_question_id,
+                        is_hidden
+                    FROM phrases
+                    WHERE phrase_id = ${Number(phraseId)}
+                    AND is_hidden = FALSE
                 `;
 
                 if (result.rows.length === 0) {
@@ -211,14 +229,16 @@ export const handler: Handlers = {
                     english_translation,
                     theme_id,
                     complexity_rating,
-                    root_question_id
+                    root_question_id,
+                    is_hidden
                 ) VALUES (
-                    ${phrase.chinese_translation},
-                    ${phrase.english_translation},
-                    ${phrase.theme_id || null},
-                    ${phrase.complexity_rating || null},
-                    ${phrase.root_question_id || null}
-                ) RETURNING phrase_id
+                     ${phrase.chinese_translation},
+                     ${phrase.english_translation},
+                     ${phrase.theme_id || null},
+                     ${phrase.complexity_rating || null},
+                     ${phrase.root_question_id || null},
+                     ${phrase.is_hidden || false}
+             ) RETURNING phrase_id
             `;
 
             return new Response(JSON.stringify({
@@ -308,15 +328,16 @@ export const handler: Handlers = {
 
             // Update the phrase
             await client.queryObject`
-            UPDATE phrases
-            SET 
-                chinese_translation = ${phrase.chinese_translation},
-                english_translation = ${phrase.english_translation},
-                theme_id = ${phrase.theme_id || null},
-                complexity_rating = ${phrase.complexity_rating || null},
-                root_question_id = ${phrase.root_question_id || null}
-            WHERE phrase_id = ${phrase.phrase_id}
-        `;
+                UPDATE phrases
+                SET
+                    chinese_translation = ${phrase.chinese_translation},
+                    english_translation = ${phrase.english_translation},
+                    theme_id = ${phrase.theme_id || null},
+                    complexity_rating = ${phrase.complexity_rating || null},
+                    root_question_id = ${phrase.root_question_id || null},
+                    is_hidden = ${phrase.is_hidden || false}
+                WHERE phrase_id = ${phrase.phrase_id}
+            `;
 
             return new Response(JSON.stringify({
                 success: true,
@@ -338,4 +359,89 @@ export const handler: Handlers = {
             await client.end();
         }
     },
+
+    async DELETE(req: Request) {
+        const client = createClient();
+        const url = new URL(req.url);
+        const phraseId = url.searchParams.get('id');
+
+        try {
+            // First validate that we have a valid phrase ID
+            if (!phraseId || isNaN(Number(phraseId))) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "Please provide a valid phrase ID"
+                }), {
+                    status: 400,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            await client.connect();
+
+            // Check if the phrase exists and isn't already marked as deleted
+            const existingPhrase = await client.queryObject`
+            SELECT phrase_id, is_hidden 
+            FROM phrases 
+            WHERE phrase_id = ${Number(phraseId)}
+        `;
+
+            if (existingPhrase.rows.length === 0) {
+                return new Response(JSON.stringify({
+                    success: false,
+                    error: "Phrase not found"
+                }), {
+                    status: 404,
+                    headers: { "Content-Type": "application/json" }
+                });
+            }
+
+            // Before deleting, check if this phrase is referenced by any responses
+            const hasResponses = await client.queryObject`
+            SELECT COUNT(*) as response_count 
+            FROM phrases 
+            WHERE root_question_id = ${Number(phraseId)}
+        `;
+
+            // If there are responses, we should handle them as well
+            if (hasResponses.rows[0].response_count > 0) {
+                // First, handle all associated responses
+                await client.queryObject`
+                UPDATE phrases 
+                SET is_hidden = TRUE
+                WHERE root_question_id = ${Number(phraseId)}
+            `;
+            }
+
+            // Now handle the main phrase deletion
+            await client.queryObject`
+            UPDATE phrases 
+            SET is_hidden = TRUE
+            WHERE phrase_id = ${Number(phraseId)}
+        `;
+
+            // Return a success response with information about what was affected
+            return new Response(JSON.stringify({
+                success: true,
+                message: "Phrase successfully deleted",
+                deletedResponses: hasResponses.rows[0].response_count > 0,
+                responseCount: hasResponses.rows[0].response_count
+            }), {
+                headers: { "Content-Type": "application/json" }
+            });
+
+        } catch (error) {
+            console.error("Error deleting phrase:", error);
+            return new Response(JSON.stringify({
+                success: false,
+                error: "Failed to delete phrase",
+                details: error.message
+            }), {
+                status: 500,
+                headers: { "Content-Type": "application/json" }
+            });
+        } finally {
+            await client.end();
+        }
+    }
 };

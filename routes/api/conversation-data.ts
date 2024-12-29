@@ -37,6 +37,7 @@ export const handler: Handlers = {
                 SELECT *
                 FROM phrases
                 WHERE root_question_id IS NULL
+                AND is_hidden = FALSE
                 ORDER BY RANDOM()
                 LIMIT 1
             `;
