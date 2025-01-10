@@ -236,7 +236,7 @@ export default function EditPhraseModal({ isOpen, messages }: EditPhraseModalPro
 
                                 <div className="flex items-center space-x-2">
                                     <label className="block text-sm font-medium">
-                                        Unhide
+                                        Show Phrase
                                     </label>
                                     <input
                                         type="checkbox"
