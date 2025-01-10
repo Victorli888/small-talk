@@ -1,6 +1,5 @@
-# Small Talk Conversation
+# Small Talk
 
-![Small Talk Logo](https://via.placeholder.com/150)
 
 A web application designed to help users practice conversational Chinese through dynamic A-B conversations. The project is built with **TypeScript**, **Preact**, **Tailwind CSS**, and **PostgreSQL**, providing an intuitive and efficient interface to enhance language-learning experiences.
 
