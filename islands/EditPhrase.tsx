@@ -248,7 +248,7 @@ export default function EditPhraseModal({ isOpen, messages }: EditPhraseModalPro
                                         className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                     />
                                     <span className="text-sm text-gray-500">
-                                    (Select to unhide phrase if hidden)
+                                    (Keep selected to reactivate phrase.)
                                     </span>
                                 </div>
 
