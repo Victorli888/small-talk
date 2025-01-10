@@ -17,7 +17,7 @@ export const speakerBPhrases = signal<PhraseData[]>([]);
 
 export async function fetchNewPhraseSet(messages: Signal<ChatMessage[]>, onPhraseSetFetched?: (phraseSet: PhraseSet) => void) {
     try {
-        const response = await fetch('/api/phrases');
+        const response = await fetch('/api/conversation-data');
         if (!response.ok) {
             throw new Error('Failed to fetch phrase set');
         }
