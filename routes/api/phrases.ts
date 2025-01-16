@@ -88,7 +88,11 @@ function createClient(): Client {
         database: Deno.env.get("DB_NAME") ?? "your_database_name",
         hostname: Deno.env.get("DB_HOST") ?? "localhost",
         password: Deno.env.get("DB_PASSWORD") ?? "your_password",
-        port: parseInt(Deno.env.get("DB_PORT") ?? "5432")
+        port: parseInt(Deno.env.get("DB_PORT") ?? "5432"),
+        tls: {
+            enabled: true,
+            enforce: true
+        }
     });
 }
 
