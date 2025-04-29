@@ -11,10 +11,10 @@ export default function DeletePhraseModal({ isOpen, messages }: DeletePhraseModa
     // State management for the component
     const formData = useSignal({
         phrase_id: "",
-        chinese_translation: "",
-        english_translation: "",
+        cantonese: "",
+        english: "",
         theme_id: "",
-        complexity_rating: "",
+        challenge_rating: "",
         root_question_id: ""
     });
 
@@ -42,10 +42,10 @@ export default function DeletePhraseModal({ isOpen, messages }: DeletePhraseModa
             // Update form with fetched data
             formData.value = {
                 ...formData.value,
-                chinese_translation: data.chinese_translation,
-                english_translation: data.english_translation,
+                cantonese: data.cantonese,
+                english: data.english,
                 theme_id: data.theme_id?.toString() || "",
-                complexity_rating: data.complexity_rating?.toString() || "",
+                challenge_rating: data.challenge_rating?.toString() || "",
                 root_question_id: data.root_question_id?.toString() || ""
             };
 
@@ -164,19 +164,19 @@ export default function DeletePhraseModal({ isOpen, messages }: DeletePhraseModa
                     )}
 
                     {/* Display phrase details (read-only) */}
-                    {formData.value.chinese_translation && (
+                    {formData.value.cantonese && (
                         <div class="space-y-4 mb-6">
                             <div>
-                                <label class="block text-sm font-medium mb-1">Chinese Translation</label>
+                                <label class="block text-sm font-medium mb-1">cantonese Translation</label>
                                 <div class="w-full p-2 bg-gray-50 border rounded">
-                                    {formData.value.chinese_translation}
+                                    {formData.value.cantonese}
                                 </div>
                             </div>
 
                             <div>
                                 <label class="block text-sm font-medium mb-1">English Translation</label>
                                 <div class="w-full p-2 bg-gray-50 border rounded">
-                                    {formData.value.english_translation}
+                                    {formData.value.english}
                                 </div>
                             </div>
 
@@ -190,7 +190,7 @@ export default function DeletePhraseModal({ isOpen, messages }: DeletePhraseModa
                             <div>
                                 <label class="block text-sm font-medium mb-1">Complexity Rating</label>
                                 <div class="w-full p-2 bg-gray-50 border rounded">
-                                    {formData.value.complexity_rating || "None"}
+                                    {formData.value.challenge_rating || "None"}
                                 </div>
                             </div>
 
@@ -204,7 +204,7 @@ export default function DeletePhraseModal({ isOpen, messages }: DeletePhraseModa
                     )}
 
                     {/* Delete and Cancel buttons */}
-                    {formData.value.chinese_translation && !showConfirmation.value && (
+                    {formData.value.cantonese && !showConfirmation.value && (
                         <div class="flex space-x-3">
                             <button
                                 onClick={() => showConfirmation.value = true}

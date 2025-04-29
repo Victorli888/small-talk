@@ -13,7 +13,7 @@ export default function ChatSuggestions({ messages }: ChatSuggestionsProps) {
     useEffect(() => {
         if (speakerBPhrases.value.length > 0) {
             const suggestionMessages = speakerBPhrases.value.map(response => ({
-                text: response.chinese_translation,
+                text: response.cantonese,
                 timestamp: new Date().toISOString()
             }));
 

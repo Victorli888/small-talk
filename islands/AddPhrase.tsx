@@ -8,10 +8,10 @@ interface AddPhraseModalProps {
 
 export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps) {
     const formData = useSignal({
-        chinese_translation: "",
-        english_translation: "",
+        cantonese: "",
+        english: "",
         theme_id: "",
-        complexity_rating: "",
+        challenge_rating: "",
         root_question_id: "",
         is_hidden: false,
     });
@@ -29,8 +29,8 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
                 body: JSON.stringify({
                     ...formData.value,
                     theme_id: formData.value.theme_id ? parseInt(formData.value.theme_id) : undefined,
-                    complexity_rating: formData.value.complexity_rating ?
-                        parseInt(formData.value.complexity_rating) : undefined,
+                    challenge_rating: formData.value.challenge_rating ?
+                        parseInt(formData.value.challenge_rating) : undefined,
                     root_question_id: formData.value.root_question_id ?
                         parseInt(formData.value.root_question_id) : undefined,
                     is_hidden: formData.value.is_hidden
@@ -48,10 +48,10 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
                 isError: false
             };
             formData.value = {
-                chinese_translation: "",
-                english_translation: "",
+                cantonese: "",
+                english: "",
                 theme_id: "",
-                complexity_rating: "",
+                challenge_rating: "",
                 root_question_id: ""
             };
         } catch (error) {
@@ -92,10 +92,10 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
                             </label>
                             <input
                                 type="text"
-                                value={formData.value.chinese_translation}
+                                value={formData.value.cantonese}
                                 onInput={(e) => formData.value = {
                                     ...formData.value,
-                                    chinese_translation: (e.target as HTMLInputElement).value
+                                    cantonese: (e.target as HTMLInputElement).value
                                 }}
                                 class="w-full p-2 border rounded"
                                 required
@@ -108,10 +108,10 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
                             </label>
                             <input
                                 type="text"
-                                value={formData.value.english_translation}
+                                value={formData.value.english}
                                 onInput={(e) => formData.value = {
                                     ...formData.value,
-                                    english_translation: (e.target as HTMLInputElement).value
+                                    english: (e.target as HTMLInputElement).value
                                 }}
                                 class="w-full p-2 border rounded"
                                 required
@@ -141,10 +141,10 @@ export default function AddPhraseModal({ isOpen, messages }: AddPhraseModalProps
                                 type="number"
                                 min="1"
                                 max="5"
-                                value={formData.value.complexity_rating}
+                                value={formData.value.challenge_rating}
                                 onInput={(e) => formData.value = {
                                     ...formData.value,
-                                    complexity_rating: (e.target as HTMLInputElement).value
+                                    challenge_rating: (e.target as HTMLInputElement).value
                                 }}
                                 class="w-full p-2 border rounded"
                             />

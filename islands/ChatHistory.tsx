@@ -27,7 +27,7 @@ export async function fetchNewPhraseSet(messages: Signal<ChatMessage[]>, onPhras
         speakerBPhrases.value = data.responses;
 
         const questionMessage: ChatMessage = {
-            text: data.question.chinese_translation,
+            text: data.question.cantonese,
             timestamp: new Date().toISOString()
         };
 
@@ -37,9 +37,9 @@ export async function fetchNewPhraseSet(messages: Signal<ChatMessage[]>, onPhras
             onPhraseSetFetched(data);
         }
 
-        console.log(`Successfully fetched new question:`, data.question.chinese_translation);
+        console.log(`Successfully fetched new question:`, data.question.cantonese);
         data.responses.forEach((response, i) => {
-            console.log(`Successfully fetched response: ${i + 1}`, response.chinese_translation);
+            console.log(`Successfully fetched response: ${i + 1}`, response.cantonese);
         });
     } catch (error) {
         console.error('Error fetching phrase set:', error);

@@ -6,18 +6,18 @@ import "https://deno.land/x/dotenv@v3.2.2/load.ts";
 
 // Let's start by defining our interfaces to describe the shape of our data
 interface NewPhrase {
-    chinese_translation: string;
-    english_translation: string;
+    cantonese: string;
+    english: string;
     theme_id?: number;
-    complexity_rating?: number;
+    challenge_rating?: number;
     root_question_id?: number;
     is_hidden?: boolean;
 }
 
 interface PhraseData {
     phrase_id: number;
-    chinese_translation: string;
-    english_translation: string;
+    cantonese: string;
+    english: string;
     root_question_id: number | null;
     is_hidden: boolean;
 }
@@ -36,13 +36,13 @@ interface ValidationResponse {
 function validatePhrase(phrase: NewPhrase): ValidationResponse {
     const errors: string[] = [];
 
-    if (!phrase.chinese_translation?.trim()) {
+    if (!phrase.cantonese?.trim()) {
         errors.push("Chinese translation is required");
-    } else if (phrase.chinese_translation.length > 500) {
+    } else if (phrase.cantonese.length > 500) {
         errors.push("Chinese translation must be 500 characters or less");
     }
 
-    if (!phrase.english_translation?.trim()) {
+    if (!phrase.english?.trim()) {
         errors.push("English translation is required");
     }
 
@@ -50,9 +50,9 @@ function validatePhrase(phrase: NewPhrase): ValidationResponse {
         errors.push("Theme ID must be a positive integer");
     }
 
-    if (phrase.complexity_rating !== undefined &&
-        (phrase.complexity_rating < 1 || phrase.complexity_rating > 5 ||
-            !Number.isInteger(phrase.complexity_rating))) {
+    if (phrase.challenge_rating !== undefined &&
+        (phrase.challenge_rating < 1 || phrase.challenge_rating > 5 ||
+            !Number.isInteger(phrase.challenge_rating))) {
         errors.push("Complexity rating must be an integer between 1 and 5");
     }
 
@@ -109,10 +109,10 @@ export const handler: Handlers = {
                     ? await client.queryObject`
                     SELECT
                         phrase_id,
-                        chinese_translation,
-                        english_translation,
+                        cantonese,
+                        english,
                         theme_id,
-                        complexity_rating,
+                        challenge_rating,
                         root_question_id,
                         is_hidden
                     FROM phrases
@@ -121,10 +121,10 @@ export const handler: Handlers = {
                     : await client.queryObject`
                     SELECT
                         phrase_id,
-                        chinese_translation,
-                        english_translation,
+                        cantonese,
+                        english,
                         theme_id,
-                        complexity_rating,
+                        challenge_rating,
                         root_question_id,
                         is_hidden
                     FROM phrases
@@ -225,17 +225,17 @@ export const handler: Handlers = {
             // Insert the new phrase
             const result = await client.queryObject`
                 INSERT INTO phrases (
-                    chinese_translation,
-                    english_translation,
+                    cantonese,
+                    english,
                     theme_id,
-                    complexity_rating,
+                    challenge_rating,
                     root_question_id,
                     is_hidden
                 ) VALUES (
-                     ${phrase.chinese_translation},
-                     ${phrase.english_translation},
+                     ${phrase.cantonese},
+                     ${phrase.english},
                      ${phrase.theme_id || null},
-                     ${phrase.complexity_rating || null},
+                     ${phrase.challenge_rating || null},
                      ${phrase.root_question_id || null},
                      ${phrase.is_hidden || false}
              ) RETURNING phrase_id
@@ -330,10 +330,10 @@ export const handler: Handlers = {
             await client.queryObject`
                 UPDATE phrases
                 SET
-                    chinese_translation = ${phrase.chinese_translation},
-                    english_translation = ${phrase.english_translation},
+                    cantonese = ${phrase.cantonese},
+                    english = ${phrase.english},
                     theme_id = ${phrase.theme_id || null},
-                    complexity_rating = ${phrase.complexity_rating || null},
+                    challenge_rating = ${phrase.challenge_rating || null},
                     root_question_id = ${phrase.root_question_id || null},
                     is_hidden = ${phrase.is_hidden || false}
                 WHERE phrase_id = ${phrase.phrase_id}

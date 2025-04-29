@@ -4,8 +4,8 @@ import "https://deno.land/x/dotenv@v3.2.2/load.ts";
 
 interface PhraseData {
     phrase_id: number;
-    chinese_translation: string;
-    english_translation: string;
+    cantonese: string;
+    english: string;
     root_question_id: number | null;
 }
 
