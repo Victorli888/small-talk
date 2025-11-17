@@ -26,21 +26,38 @@ function createClient(): Client {
 
 export const handler: Handlers = {
     // GET handler for fetching random questions and their responses
-    async GET(_req: Request) {
+    async GET(req: Request) {
         const client = createClient();
+        const url = new URL(req.url);
+        const themeId = url.searchParams.get('theme_id');
 
         try {
             await client.connect();
 
-            // First, get a random question (phrase with no root_question_id)
-            const result = await client.queryObject<PhraseData>`
-                SELECT *
-                FROM phrases
-                WHERE root_question_id IS NULL
-                AND is_hidden = FALSE
-                ORDER BY RANDOM()
-                LIMIT 1
-            `;
+            // Build query based on whether theme_id is provided
+            let result;
+            if (themeId && !isNaN(Number(themeId))) {
+                // Get a random question from the specified theme
+                result = await client.queryObject<PhraseData>`
+                    SELECT *
+                    FROM phrases
+                    WHERE root_question_id IS NULL
+                    AND is_hidden = FALSE
+                    AND theme_id = ${Number(themeId)}
+                    ORDER BY RANDOM()
+                    LIMIT 1
+                `;
+            } else {
+                // Get a random question from any theme
+                result = await client.queryObject<PhraseData>`
+                    SELECT *
+                    FROM phrases
+                    WHERE root_question_id IS NULL
+                    AND is_hidden = FALSE
+                    ORDER BY RANDOM()
+                    LIMIT 1
+                `;
+            }
 
             if (result.rows.length === 0) {
                 return new Response(JSON.stringify({message: "No questions found"}), {

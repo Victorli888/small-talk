@@ -7,7 +7,6 @@
 .idea
 # Unecessary Fresh Files
 _fresh/
-fresh.gen.ts
 # npm dependencies
 node_modules/
 

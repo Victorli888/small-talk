@@ -1,76 +1,66 @@
-import { Signal, signal, useSignal } from "@preact/signals";
+import { Signal, useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 import { ChatMessage, speakerBPhrases, fetchNewPhraseSet } from "./ChatHistory.tsx";
+import { PhraseData } from "../routes/api/phrases.ts";
 
 interface ChatSuggestionsProps {
     messages: Signal<ChatMessage[]>;
+    themeId?: number | null;
 }
 
-export default function ChatSuggestions({ messages }: ChatSuggestionsProps) {
-    const responseSuggestions = useSignal<ChatMessage[]>([]);
-    const isOpen = useSignal(true);
+export default function ChatSuggestions({ messages, themeId }: ChatSuggestionsProps) {
+    const responsePhrases = useSignal<PhraseData[]>([]);
 
     useEffect(() => {
         if (speakerBPhrases.value.length > 0) {
-            const suggestionMessages = speakerBPhrases.value.map(response => ({
-                text: response.cantonese,
-                timestamp: new Date().toISOString()
-            }));
-
-            responseSuggestions.value = suggestionMessages;
-            console.log(`SpeakerB Suggestions: ${speakerBPhrases.value}`);
+            responsePhrases.value = speakerBPhrases.value;
+        } else {
+            responsePhrases.value = [];
         }
     }, [speakerBPhrases.value]);
 
-    const handleSuggestionClick = async (suggestion: ChatMessage) => {
-        // Add the selected response to messages
-        messages.value = [...messages.value, suggestion];
+    const handleResponseClick = async (response: PhraseData) => {
+        // Add the selected response as a user message
+        const userMessage: ChatMessage = {
+            text: response.cantonese,
+            timestamp: new Date().toISOString(),
+            isUser: true,
+            english: response.english
+        };
+
+        messages.value = [...messages.value, userMessage];
 
         // Clear current suggestions
-        responseSuggestions.value = [];
+        responsePhrases.value = [];
 
         // Fetch new phrase set after a short delay
         setTimeout(() => {
-            fetchNewPhraseSet(messages);
+            fetchNewPhraseSet(messages, undefined, themeId ?? null);
         }, 350);
     };
 
     // If no suggestions, don't render anything
-    if (responseSuggestions.value.length === 0) return null;
+    if (responsePhrases.value.length === 0) return null;
 
     return (
-        <div class="bg-white shadow-md rounded-b-lg border border-gray-200">
-            <div
-                class="flex justify-between items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors"
-                onClick={() => isOpen.value = !isOpen.value}
-            >
-                <h3 class="text-sm font-semibold text-gray-700">
-                    {isOpen.value ? 'Hide' : 'Show'} Conversation Suggestions
-                </h3>
-                {isOpen.value
-                    ? <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="m18 15-6-6-6 6"/></svg>
-                    : <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><path d="m6 9 6 6 6-6"/></svg>
-                }
-            </div>
-
-            {isOpen.value && (
-                <div class="p-4 pt-0">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600 mb-2">Possible Responses:</p>
-                        <div class="flex flex-col overflow-x-auto space-y-2">
-                            {responseSuggestions.value.map((suggestion, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleSuggestionClick(suggestion)}
-                                    class="px-3 py-1 bg-blue-100 text-blue-600 rounded-full whitespace-nowrap hover:bg-blue-200 transition-colors"
-                                >
-                                    {suggestion.text}
-                                </button>
-                            ))}
+        <div class="bg-white border-t border-gray-200 p-4">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">Choose your response:</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {responsePhrases.value.map((response, index) => (
+                    <button
+                        key={index}
+                        onClick={() => handleResponseClick(response)}
+                        class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-lg hover:border-blue-500 hover:from-blue-100 hover:to-blue-200 transition-all cursor-pointer text-left shadow-sm hover:shadow-md"
+                    >
+                        <div class="font-medium text-gray-800 mb-1">
+                            {response.cantonese}
                         </div>
-                    </div>
-                </div>
-            )}
+                        <div class="text-xs text-gray-600 italic">
+                            {response.english}
+                        </div>
+                    </button>
+                ))}
+            </div>
         </div>
     );
 }

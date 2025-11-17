@@ -1,42 +1,14 @@
-import { useSignal } from "@preact/signals";
-import ChatHistory, { ChatMessage, PhraseSet } from "../islands/ChatHistory.tsx";
-import PhraseManager from "../islands/PhraseManager.tsx";
-import ChatSuggestions from "../islands/ChatSuggestion.tsx";
+import { useEffect } from "preact/hooks";
 
 export default function Home() {
-    const messages = useSignal<ChatMessage[]>([]);
-    const currentPhraseSet = useSignal<PhraseSet | null>(null);
-
-    const handlePhraseSetFetched = (phraseSet: PhraseSet) => {
-        currentPhraseSet.value = phraseSet;
-    };
+    useEffect(() => {
+        window.location.href = '/cantonese/themes';
+    }, []);
 
     return (
-        <div class="px-4 py-8 mx-auto bg-[#86efacff]">
-            <div class="max-w-screen-md mx-auto flex flex-col items-center justify-center">
-                <img
-                    class="my-6"
-                    src="/SmallTalkLogo.svg"
-                    width="256"
-                    height="256"
-                    alt="the Fresh logo: a sliced lemon dripping with juice"
-                />
-                {/* Chat Component */}
-                <div class="w-full max-w-md mt-8 border rounded-lg shadow-lg">
-                    <ChatHistory
-                        messages={messages}
-                        onPhraseSetFetched={handlePhraseSetFetched}
-                    />
-
-                    <ChatSuggestions
-                        messages={messages}
-                    />
-
-                    <PhraseManager
-                        messages={messages}
-                    />
-
-                </div>
+        <div class="min-h-screen bg-[#86efacff] flex items-center justify-center">
+            <div class="text-center">
+                <div class="text-gray-500">Redirecting...</div>
             </div>
         </div>
     );

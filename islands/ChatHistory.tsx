@@ -1,23 +1,33 @@
 import { Signal, signal } from "@preact/signals";
-import { useEffect, useRef } from "preact/hooks";  // Added useRef
+import { useEffect, useRef } from "preact/hooks";
 import { PhraseSet, PhraseData } from "../routes/api/phrases.ts"
 
 export interface ChatMessage {
     text: string;
     timestamp: string;
+    isUser?: boolean; // true for user messages, false for bot/other speaker
+    english?: string; // optional translation
 }
 
 export interface ChatHistoryProps {
     messages: Signal<ChatMessage[]>;
     onPhraseSetFetched?: (phraseSet: PhraseSet) => void;
+    themeId?: number | null;
 }
 
 export const speakerAPhrase = signal<PhraseData | null>(null);
 export const speakerBPhrases = signal<PhraseData[]>([]);
 
-export async function fetchNewPhraseSet(messages: Signal<ChatMessage[]>, onPhraseSetFetched?: (phraseSet: PhraseSet) => void) {
+export async function fetchNewPhraseSet(
+    messages: Signal<ChatMessage[]>, 
+    onPhraseSetFetched?: (phraseSet: PhraseSet) => void,
+    themeId?: number | null
+) {
     try {
-        const response = await fetch('/api/conversation-data');
+        const url = themeId 
+            ? `/api/conversation-data?theme_id=${themeId}`
+            : '/api/conversation-data';
+        const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Failed to fetch phrase set');
         }
@@ -26,9 +36,12 @@ export async function fetchNewPhraseSet(messages: Signal<ChatMessage[]>, onPhras
         speakerAPhrase.value = data.question;
         speakerBPhrases.value = data.responses;
 
+        // Add bot's question as a message (not from user)
         const questionMessage: ChatMessage = {
             text: data.question.cantonese,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            isUser: false,
+            english: data.question.english
         };
 
         messages.value = [...messages.value, questionMessage];
@@ -46,15 +59,15 @@ export async function fetchNewPhraseSet(messages: Signal<ChatMessage[]>, onPhras
     }
 }
 
-export default function ChatHistory({ messages, onPhraseSetFetched }: ChatHistoryProps) {
+export default function ChatHistory({ messages, onPhraseSetFetched, themeId }: ChatHistoryProps) {
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         // Only fetch a phrase set if there are no messages
-        if (messages.value.length === 0) {
-            fetchNewPhraseSet(messages, onPhraseSetFetched);
+        if (messages.value.length === 0 && themeId !== null && themeId !== undefined) {
+            fetchNewPhraseSet(messages, onPhraseSetFetched, themeId);
         }
-    }, []);
+    }, [themeId]);
 
     // Added effect for auto-scrolling
     useEffect(() => {
@@ -66,31 +79,35 @@ export default function ChatHistory({ messages, onPhraseSetFetched }: ChatHistor
     return (
         <div
             ref={chatContainerRef}
-            class="flex flex-col space-y-2 p-4 h-[400px] overflow-y-auto bg-white"  // Added h-[400px] and overflow-y-auto
+            class="flex flex-col space-y-3 p-4 h-[400px] overflow-y-auto bg-white"
         >
             {messages.value.length === 0 ? (
-                <div class="text-center text-black-500">
-                    No messages yet...
+                <div class="text-center text-gray-500">
+                    Select a situation to start the conversation...
                 </div>
             ) : (
-                messages.value.map((message, index) => (
-                    <div
-                        key={index}
-                        class={`flex ${index % 2 === 0 ? 'justify-start' : 'justify-end'}`}
-                    >
+                messages.value.map((message, index) => {
+                    const isUser = message.isUser ?? (index % 2 === 1);
+                    return (
                         <div
-                            class={`${index % 2 === 0
-                                ? 'bg-gray-200 text-black'
-                                : 'bg-blue-500 text-white'} 
-                                px-4 py-2 rounded-lg max-w-[70%]`}
+                            key={index}
+                            class={`flex ${isUser ? 'justify-end' : 'justify-start'}`}
                         >
-                            <span>{message.text}</span>
-                            <div class="text-xs text-right opacity-70 mt-1">
-                                {new Date(message.timestamp).toLocaleTimeString()}
+                            <div
+                                class={`${isUser
+                                    ? 'bg-blue-500 text-white'
+                                    : 'bg-gray-200 text-black'} 
+                                    px-4 py-2 rounded-lg max-w-[70%] cursor-pointer hover:opacity-90 transition-opacity`}
+                                title={message.english ? `Translation: ${message.english}` : ''}
+                            >
+                                <span>{message.text}</span>
+                                <div class={`text-xs ${isUser ? 'text-right' : 'text-left'} opacity-70 mt-1`}>
+                                    {new Date(message.timestamp).toLocaleTimeString()}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))
+                    );
+                })
             )}
         </div>
     );
