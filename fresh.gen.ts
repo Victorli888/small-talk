@@ -7,6 +7,7 @@ import * as $_app from "./routes/_app.tsx";
 import * as $api_conversation_data from "./routes/api/conversation-data.ts";
 import * as $api_joke from "./routes/api/joke.ts";
 import * as $api_phrases from "./routes/api/phrases.ts";
+import * as $api_situations from "./routes/api/situations.ts";
 import * as $cantonese_theme_id_chat from "./routes/cantonese/[theme_id]/chat.tsx";
 import * as $cantonese_themes from "./routes/cantonese/themes.tsx";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
@@ -30,6 +31,7 @@ const manifest = {
     "./routes/api/conversation-data.ts": $api_conversation_data,
     "./routes/api/joke.ts": $api_joke,
     "./routes/api/phrases.ts": $api_phrases,
+    "./routes/api/situations.ts": $api_situations,
     "./routes/cantonese/[theme_id]/chat.tsx": $cantonese_theme_id_chat,
     "./routes/cantonese/themes.tsx": $cantonese_themes,
     "./routes/greet/[name].tsx": $greet_name_,
