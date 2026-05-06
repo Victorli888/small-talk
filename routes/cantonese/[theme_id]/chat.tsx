@@ -1,21 +1,36 @@
 import { PageProps } from "$fresh/server.ts";
 import ChatPage from "../../../islands/ChatPage.tsx";
+import { THEMES } from "../../../lib/prompts.ts";
 
-export default function ChatRoute(props: PageProps) {
-    const themeId = parseInt(props.params.theme_id);
-    
-    if (isNaN(themeId)) {
-        return (
-            <div class="min-h-screen bg-[#86efacff] flex items-center justify-center">
-                <div class="text-center">
-                    <div class="text-red-600 font-semibold mb-2">Invalid Theme ID</div>
-                    <a href="/cantonese/themes" class="text-blue-600 hover:underline">
-                        ← Back to Themes
-                    </a>
-                </div>
-            </div>
-        );
-    }
+export default function ChatRoute({ params }: PageProps) {
+  const themeId = params.theme_id;
+  const theme = THEMES[themeId];
 
-    return <ChatPage themeId={themeId} />;
+  if (!theme) {
+    return (
+      <div
+        style={{ background: "var(--bg)", color: "var(--text)" }}
+        class="min-h-screen flex items-center justify-center"
+      >
+        <div class="text-center">
+          <div style={{ color: "var(--text3)" }} class="text-lg mb-4">Theme not found</div>
+          <a
+            href="/cantonese/themes"
+            style={{ color: "var(--purple)" }}
+            class="underline"
+          >
+            Back to themes
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ChatPage
+      themeId={themeId}
+      emoji={theme.emoji}
+      themeName={theme.name}
+    />
+  );
 }

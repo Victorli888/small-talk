@@ -1,79 +1,114 @@
-import { useSignal } from "@preact/signals";
-import { useEffect } from "preact/hooks";
+import { THEMES } from "../lib/prompts.ts";
 
-interface Situation {
-    situation_id: number;
-    situation_name: string;
-    description: string;
-}
+const THEME_ORDER = [
+  "personal-identity",
+  "daily-routines",
+  "food-dining",
+  "directions",
+  "shopping",
+  "small-talk",
+  "health",
+  "work",
+  "leisure",
+  "travel",
+  "relationships",
+  "problem-solving",
+  "technology",
+  "education",
+];
 
 export default function ThemesPage() {
-    const situations = useSignal<Situation[]>([]);
-    const isLoading = useSignal(true);
-
-    useEffect(() => {
-        async function fetchSituations() {
-            try {
-                const response = await fetch('/api/situations');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch situations');
-                }
-                const data = await response.json();
-                situations.value = data;
-                isLoading.value = false;
-            } catch (error) {
-                console.error('Error fetching situations:', error);
-                isLoading.value = false;
-            }
-        }
-        fetchSituations();
-    }, []);
-
-    const handleThemeSelect = (themeId: number) => {
-        window.location.href = `/cantonese/${themeId}/chat`;
-    };
-
-    return (
-        <div class="min-h-screen bg-[#86efacff] px-4 py-8">
-            <div class="max-w-6xl mx-auto">
-                <div class="text-center mb-8">
-                    <img
-                        class="mx-auto my-6"
-                        src="/SmallTalkLogo.svg"
-                        width="200"
-                        height="200"
-                        alt="Small Talk Logo"
-                    />
-                    <h1 class="text-4xl font-bold text-gray-800 mb-2">Choose a Theme</h1>
-                    <p class="text-gray-600">Select a situation to practice your Cantonese conversation</p>
-                </div>
-
-                {isLoading.value ? (
-                    <div class="text-center text-gray-500 py-12">
-                        Loading themes...
-                    </div>
-                ) : (
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {situations.value.map((situation) => (
-                            <button
-                                key={situation.situation_id}
-                                onClick={() => handleThemeSelect(situation.situation_id)}
-                                class="p-6 bg-white border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:shadow-lg transition-all cursor-pointer text-left group"
-                            >
-                                <h3 class="text-xl font-semibold text-gray-800 mb-2 group-hover:text-blue-600">
-                                    {situation.situation_name}
-                                </h3>
-                                <p class="text-sm text-gray-600 line-clamp-3">
-                                    {situation.description}
-                                </p>
-                                <div class="mt-4 text-blue-600 text-sm font-medium">
-                                    Start Practice →
-                                </div>
-                            </button>
-                        ))}
-                    </div>
-                )}
-            </div>
+  return (
+    <div
+      style={{ background: "var(--bg)", color: "var(--text)", minHeight: "100vh" }}
+    >
+      {/* Header */}
+      <header
+        style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)" }}
+        class="sticky top-0 z-10 px-6 py-4"
+      >
+        <div class="max-w-4xl mx-auto text-center">
+          <div class="flex items-center justify-center gap-3 mb-3">
+            <img
+              src="/SmallTalkLogo.svg"
+              alt="Small Talk"
+              width="40"
+              height="40"
+              style={{ borderRadius: "10px" }}
+            />
+            <span style={{ color: "var(--text)" }} class="text-xl font-bold tracking-tight">
+              Small Talk
+            </span>
+          </div>
+          <div
+            style={{
+              background: "var(--bg3)",
+              color: "var(--accent)",
+              border: "1px solid var(--border2)",
+              display: "inline-block",
+            }}
+            class="text-xs font-medium px-3 py-1 rounded-full mb-3"
+          >
+            廣東話 · Cantonese
+          </div>
+          <h1
+            style={{ color: "var(--text)" }}
+            class="text-2xl font-bold mb-1"
+          >
+            Choose a Topic
+          </h1>
+          <p style={{ color: "var(--text3)" }} class="text-sm">
+            Select a theme to start your conversation practice
+          </p>
         </div>
-    );
+      </header>
+
+      {/* Theme grid */}
+      <main class="max-w-4xl mx-auto px-4 py-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {THEME_ORDER.map((id) => {
+            const theme = THEMES[id];
+            if (!theme) return null;
+            return (
+              <a
+                key={id}
+                href={`/cantonese/${id}/chat`}
+                style={{
+                  background: "var(--bg3)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text)",
+                  textDecoration: "none",
+                  display: "block",
+                  transition: "border-color 0.15s, background 0.15s",
+                }}
+                class="rounded-xl p-4 group hover:bg-[var(--bg4)]"
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--border2)";
+                  (e.currentTarget as HTMLElement).style.background = "var(--bg4)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
+                  (e.currentTarget as HTMLElement).style.background = "var(--bg3)";
+                }}
+              >
+                <div class="text-3xl mb-3">{theme.emoji}</div>
+                <div
+                  style={{ color: "var(--text)" }}
+                  class="font-semibold text-sm mb-1"
+                >
+                  {theme.name}
+                </div>
+                <div
+                  style={{ color: "var(--text3)" }}
+                  class="text-xs leading-snug"
+                >
+                  {theme.description}
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </main>
+    </div>
+  );
 }
