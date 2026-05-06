@@ -4,38 +4,36 @@
 
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
+import * as $api_chat from "./routes/api/chat.ts";
 import * as $api_conversation_data from "./routes/api/conversation-data.ts";
 import * as $api_joke from "./routes/api/joke.ts";
 import * as $api_phrases from "./routes/api/phrases.ts";
+import * as $api_situations from "./routes/api/situations.ts";
+import * as $cantonese_theme_id_chat from "./routes/cantonese/[theme_id]/chat.tsx";
+import * as $cantonese_themes from "./routes/cantonese/themes.tsx";
 import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
-import * as $AddPhrase from "./islands/AddPhrase.tsx";
-import * as $ChatHistory from "./islands/ChatHistory.tsx";
-import * as $ChatSuggestion from "./islands/ChatSuggestion.tsx";
-import * as $Counter from "./islands/Counter.tsx";
-import * as $DeletePhrase from "./islands/DeletePhrase.tsx";
-import * as $EditPhrase from "./islands/EditPhrase.tsx";
-import * as $PhraseManager from "./islands/PhraseManager.tsx";
+import * as $ChatPage from "./islands/ChatPage.tsx";
+import * as $ThemesPage from "./islands/ThemesPage.tsx";
 import type { Manifest } from "$fresh/server.ts";
 
 const manifest = {
   routes: {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
+    "./routes/api/chat.ts": $api_chat,
     "./routes/api/conversation-data.ts": $api_conversation_data,
     "./routes/api/joke.ts": $api_joke,
     "./routes/api/phrases.ts": $api_phrases,
+    "./routes/api/situations.ts": $api_situations,
+    "./routes/cantonese/[theme_id]/chat.tsx": $cantonese_theme_id_chat,
+    "./routes/cantonese/themes.tsx": $cantonese_themes,
     "./routes/greet/[name].tsx": $greet_name_,
     "./routes/index.tsx": $index,
   },
   islands: {
-    "./islands/AddPhrase.tsx": $AddPhrase,
-    "./islands/ChatHistory.tsx": $ChatHistory,
-    "./islands/ChatSuggestion.tsx": $ChatSuggestion,
-    "./islands/Counter.tsx": $Counter,
-    "./islands/DeletePhrase.tsx": $DeletePhrase,
-    "./islands/EditPhrase.tsx": $EditPhrase,
-    "./islands/PhraseManager.tsx": $PhraseManager,
+    "./islands/ChatPage.tsx": $ChatPage,
+    "./islands/ThemesPage.tsx": $ThemesPage,
   },
   baseUrl: import.meta.url,
 } satisfies Manifest;
