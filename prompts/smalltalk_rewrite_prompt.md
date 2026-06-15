@@ -4,10 +4,11 @@
 
 ## Project Overview
 
-A web-based Cantonese language learning app where users select a conversation theme, then practice
-speaking with an AI that acts as a native Cantonese speaker. The AI presents scenarios, grades
-responses out of 10, and offers collapsible correction hints. The app is built for Cantonese now
-but architected to support additional languages later.
+A web-based Cantonese language learning app where users select a conversation
+theme, then practice speaking with an AI that acts as a native Cantonese
+speaker. The AI presents scenarios, grades responses out of 10, and offers
+collapsible correction hints. The app is built for Cantonese now but architected
+to support additional languages later.
 
 ---
 
@@ -84,7 +85,8 @@ TONE:
 
 ## Theme-Specific System Prompt Additions
 
-Each theme appends the following to the global prompt. Pass both together as the system prompt.
+Each theme appends the following to the global prompt. Pass both together as the
+system prompt.
 
 ---
 
@@ -414,7 +416,8 @@ EXAMPLE OPENING:
 When a user selects a theme, concatenate the prompts like this:
 
 ```javascript
-const systemPrompt = GLOBAL_SYSTEM_PROMPT + "\n\n" + THEME_PROMPTS[selectedTheme];
+const systemPrompt = GLOBAL_SYSTEM_PROMPT + "\n\n" +
+  THEME_PROMPTS[selectedTheme];
 ```
 
 Pass this as the `system` parameter in your API call:
@@ -427,13 +430,13 @@ const response = await fetch("https://api.anthropic.com/v1/messages", {
     model: "claude-sonnet-4-20250514",
     max_tokens: 1000,
     system: systemPrompt,
-    messages: conversationHistory
-  })
+    messages: conversationHistory,
+  }),
 });
 ```
 
-Keep `conversationHistory` as the full array of `{ role, content }` objects from the session.
-Reset it to `[]` when the user starts a new theme.
+Keep `conversationHistory` as the full array of `{ role, content }` objects from
+the session. Reset it to `[]` when the user starts a new theme.
 
 ---
 
@@ -462,5 +465,6 @@ function parseResponse(text) {
 }
 ```
 
-Show only the field matching the user's current display toggle (Cantonese / Jyutping / English).
-The hint button reveals `improved` + `explanation` in the expandable correction box.
+Show only the field matching the user's current display toggle (Cantonese /
+Jyutping / English). The hint button reveals `improved` + `explanation` in the
+expandable correction box.

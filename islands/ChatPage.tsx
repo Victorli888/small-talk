@@ -70,7 +70,10 @@ function uid() {
   return Math.random().toString(36).slice(2);
 }
 
-function findLastIndex<T>(arr: T[], pred: (v: T, i: number) => boolean): number {
+function findLastIndex<T>(
+  arr: T[],
+  pred: (v: T, i: number) => boolean,
+): number {
   for (let i = arr.length - 1; i >= 0; i--) {
     if (pred(arr[i], i)) return i;
   }
@@ -82,7 +85,9 @@ function findLastIndex<T>(arr: T[], pred: (v: T, i: number) => boolean): number 
 function TypingIndicator() {
   return (
     <div class="flex flex-col items-start mb-4">
-      <span style={{ color: "var(--text3)" }} class="text-xs mb-1 ml-1">老師</span>
+      <span style={{ color: "var(--text3)" }} class="text-xs mb-1 ml-1">
+        老師
+      </span>
       <div
         style={{
           background: "var(--ai-bubble)",
@@ -109,12 +114,11 @@ interface HintBoxProps {
 }
 
 function HintBox({ parsed, open, displayLang, onUseThis }: HintBoxProps) {
-  const improvedText =
-    displayLang === "cantonese"
-      ? parsed.improved
-      : displayLang === "jyutping"
-      ? parsed.jyutping_improved
-      : parsed.english_improved;
+  const improvedText = displayLang === "cantonese"
+    ? parsed.improved
+    : displayLang === "jyutping"
+    ? parsed.jyutping_improved
+    : parsed.english_improved;
 
   return (
     <div class={`hint-box ${open ? "hint-box-open" : "hint-box-closed"}`}>
@@ -134,7 +138,10 @@ function HintBox({ parsed, open, displayLang, onUseThis }: HintBoxProps) {
           </div>
         )}
         {parsed.explanation && (
-          <div style={{ color: "var(--text2)" }} class="text-xs leading-relaxed mb-3">
+          <div
+            style={{ color: "var(--text2)" }}
+            class="text-xs leading-relaxed mb-3"
+          >
             {parsed.explanation}
           </div>
         )}
@@ -201,7 +208,9 @@ interface MessageBubbleProps {
   onUseThis: (improved: string) => void;
 }
 
-function MessageBubble({ msg, onToggleHint, onCycleLang, onUseThis }: MessageBubbleProps) {
+function MessageBubble(
+  { msg, onToggleHint, onCycleLang, onUseThis }: MessageBubbleProps,
+) {
   const isUser = msg.role === "user";
   const displayLang = msg.displayLang;
 
@@ -209,9 +218,12 @@ function MessageBubble({ msg, onToggleHint, onCycleLang, onUseThis }: MessageBub
     if (isUser) return msg.raw;
     if (!msg.parsed) return msg.raw;
     switch (displayLang) {
-      case "cantonese": return msg.parsed.cantonese ?? msg.raw;
-      case "jyutping": return msg.parsed.jyutping ?? msg.raw;
-      case "english": return msg.parsed.english ?? msg.raw;
+      case "cantonese":
+        return msg.parsed.cantonese ?? msg.raw;
+      case "jyutping":
+        return msg.parsed.jyutping ?? msg.raw;
+      case "english":
+        return msg.parsed.english ?? msg.raw;
     }
   };
 
@@ -220,7 +232,9 @@ function MessageBubble({ msg, onToggleHint, onCycleLang, onUseThis }: MessageBub
   if (isUser) {
     return (
       <div class="flex flex-col items-end mb-4">
-        <span style={{ color: "var(--text3)" }} class="text-xs mb-1 mr-1">You</span>
+        <span style={{ color: "var(--text3)" }} class="text-xs mb-1 mr-1">
+          You
+        </span>
         <div
           style={{
             background: "var(--user-bubble)",
@@ -230,7 +244,10 @@ function MessageBubble({ msg, onToggleHint, onCycleLang, onUseThis }: MessageBub
           }}
           class="px-4 py-3 rounded-xl"
         >
-          <div style={{ color: "var(--text)" }} class="text-sm leading-relaxed whitespace-pre-wrap">
+          <div
+            style={{ color: "var(--text)" }}
+            class="text-sm leading-relaxed whitespace-pre-wrap"
+          >
             {displayText()}
           </div>
         </div>
@@ -240,7 +257,9 @@ function MessageBubble({ msg, onToggleHint, onCycleLang, onUseThis }: MessageBub
 
   return (
     <div class="flex flex-col items-start mb-4" style={{ maxWidth: "82%" }}>
-      <span style={{ color: "var(--text3)" }} class="text-xs mb-1 ml-1">老師</span>
+      <span style={{ color: "var(--text3)" }} class="text-xs mb-1 ml-1">
+        老師
+      </span>
       <div
         style={{
           background: "var(--ai-bubble)",
@@ -256,7 +275,10 @@ function MessageBubble({ msg, onToggleHint, onCycleLang, onUseThis }: MessageBub
           style={{ cursor: "pointer" }}
           class="px-4 pt-3 pb-2"
         >
-          <div style={{ color: "var(--text)" }} class="text-sm leading-relaxed whitespace-pre-wrap">
+          <div
+            style={{ color: "var(--text)" }}
+            class="text-sm leading-relaxed whitespace-pre-wrap"
+          >
             {displayText()}
           </div>
           <div class="flex justify-end mt-2">
@@ -463,7 +485,10 @@ export default function ChatPage({ themeId, emoji, themeName }: Props) {
     setMessages(newMessages);
 
     const lastUserHistIdx = findLastIndex(history, (h) => h.role === "user");
-    const lastAssistantHistIdx = findLastIndex(history, (h) => h.role === "assistant");
+    const lastAssistantHistIdx = findLastIndex(
+      history,
+      (h) => h.role === "assistant",
+    );
 
     const newHistory = history
       .map((h, i) =>
@@ -490,7 +515,10 @@ export default function ChatPage({ themeId, emoji, themeName }: Props) {
     >
       {/* Header */}
       <header
-        style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)" }}
+        style={{
+          background: "var(--bg2)",
+          borderBottom: "1px solid var(--border)",
+        }}
         class="flex items-center gap-3 px-4 py-3 flex-shrink-0"
       >
         <button
@@ -527,7 +555,9 @@ export default function ChatPage({ themeId, emoji, themeName }: Props) {
             style={{ background: "var(--green)" }}
             class="w-2 h-2 rounded-full"
           />
-          <span style={{ color: "var(--text3)" }} class="text-xs">AI ready</span>
+          <span style={{ color: "var(--text3)" }} class="text-xs">
+            AI ready
+          </span>
         </div>
       </header>
 
@@ -555,7 +585,12 @@ export default function ChatPage({ themeId, emoji, themeName }: Props) {
             <span>{error}</span>
             <button
               onClick={() => setError(null)}
-              style={{ color: "var(--red)", cursor: "pointer", background: "none", border: "none" }}
+              style={{
+                color: "var(--red)",
+                cursor: "pointer",
+                background: "none",
+                border: "none",
+              }}
               class="ml-3 font-bold text-base"
             >
               ×
@@ -567,7 +602,10 @@ export default function ChatPage({ themeId, emoji, themeName }: Props) {
 
       {/* Input bar */}
       <div
-        style={{ background: "var(--bg2)", borderTop: "1px solid var(--border)" }}
+        style={{
+          background: "var(--bg2)",
+          borderTop: "1px solid var(--border)",
+        }}
         class="flex-shrink-0 px-4 pt-3 pb-4"
       >
         {/* Input row */}
@@ -593,7 +631,9 @@ export default function ChatPage({ themeId, emoji, themeName }: Props) {
             onClick={handleSubmit}
             disabled={loading || !input.trim()}
             style={{
-              background: loading || !input.trim() ? "var(--bg4)" : "var(--purple)",
+              background: loading || !input.trim()
+                ? "var(--bg4)"
+                : "var(--purple)",
               color: loading || !input.trim() ? "var(--text3)" : "#fff",
               border: "none",
               cursor: loading || !input.trim() ? "not-allowed" : "pointer",

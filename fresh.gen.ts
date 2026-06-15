@@ -5,13 +5,8 @@
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_chat from "./routes/api/chat.ts";
-import * as $api_conversation_data from "./routes/api/conversation-data.ts";
-import * as $api_joke from "./routes/api/joke.ts";
-import * as $api_phrases from "./routes/api/phrases.ts";
-import * as $api_situations from "./routes/api/situations.ts";
 import * as $cantonese_theme_id_chat from "./routes/cantonese/[theme_id]/chat.tsx";
 import * as $cantonese_themes from "./routes/cantonese/themes.tsx";
-import * as $greet_name_ from "./routes/greet/[name].tsx";
 import * as $index from "./routes/index.tsx";
 import * as $ChatPage from "./islands/ChatPage.tsx";
 import * as $ThemesPage from "./islands/ThemesPage.tsx";
@@ -22,13 +17,8 @@ const manifest = {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/api/chat.ts": $api_chat,
-    "./routes/api/conversation-data.ts": $api_conversation_data,
-    "./routes/api/joke.ts": $api_joke,
-    "./routes/api/phrases.ts": $api_phrases,
-    "./routes/api/situations.ts": $api_situations,
     "./routes/cantonese/[theme_id]/chat.tsx": $cantonese_theme_id_chat,
     "./routes/cantonese/themes.tsx": $cantonese_themes,
-    "./routes/greet/[name].tsx": $greet_name_,
     "./routes/index.tsx": $index,
   },
   islands: {

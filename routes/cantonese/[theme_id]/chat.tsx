@@ -13,7 +13,9 @@ export default function ChatRoute({ params }: PageProps) {
         class="min-h-screen flex items-center justify-center"
       >
         <div class="text-center">
-          <div style={{ color: "var(--text3)" }} class="text-lg mb-4">Theme not found</div>
+          <div style={{ color: "var(--text3)" }} class="text-lg mb-4">
+            Theme not found
+          </div>
           <a
             href="/cantonese/themes"
             style={{ color: "var(--purple)" }}

@@ -32,5 +32,3 @@ jobs:
           project: "victorli888-small-talk-46"
           entrypoint: "main.ts"
           root: "."
-          
-          

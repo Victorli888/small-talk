@@ -55,7 +55,10 @@ export const handler: Handlers = {
     if (!anthropicRes.ok) {
       return new Response(
         JSON.stringify({ error: data.error?.message ?? "Anthropic API error" }),
-        { status: anthropicRes.status, headers: { "Content-Type": "application/json" } },
+        {
+          status: anthropicRes.status,
+          headers: { "Content-Type": "application/json" },
+        },
       );
     }
 

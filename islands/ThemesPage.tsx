@@ -20,11 +20,18 @@ const THEME_ORDER = [
 export default function ThemesPage() {
   return (
     <div
-      style={{ background: "var(--bg)", color: "var(--text)", minHeight: "100vh" }}
+      style={{
+        background: "var(--bg)",
+        color: "var(--text)",
+        minHeight: "100vh",
+      }}
     >
       {/* Header */}
       <header
-        style={{ background: "var(--bg2)", borderBottom: "1px solid var(--border)" }}
+        style={{
+          background: "var(--bg2)",
+          borderBottom: "1px solid var(--border)",
+        }}
         class="sticky top-0 z-10 px-6 py-4"
       >
         <div class="max-w-4xl mx-auto text-center">
@@ -36,7 +43,10 @@ export default function ThemesPage() {
               height="40"
               style={{ borderRadius: "10px" }}
             />
-            <span style={{ color: "var(--text)" }} class="text-xl font-bold tracking-tight">
+            <span
+              style={{ color: "var(--text)" }}
+              class="text-xl font-bold tracking-tight"
+            >
               Small Talk
             </span>
           </div>
@@ -83,12 +93,16 @@ export default function ThemesPage() {
                 }}
                 class="rounded-xl p-4 group hover:bg-[var(--bg4)]"
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "var(--border2)";
-                  (e.currentTarget as HTMLElement).style.background = "var(--bg4)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--border2)";
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--bg4)";
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "var(--border)";
-                  (e.currentTarget as HTMLElement).style.background = "var(--bg3)";
+                  (e.currentTarget as HTMLElement).style.borderColor =
+                    "var(--border)";
+                  (e.currentTarget as HTMLElement).style.background =
+                    "var(--bg3)";
                 }}
               >
                 <div class="text-3xl mb-3">{theme.emoji}</div>
