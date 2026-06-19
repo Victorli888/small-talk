@@ -12,3 +12,4 @@ node_modules/
 
 # Files That don't need to be tracked
 .DS_Store
+scratch/

@@ -1,12 +1,17 @@
 import { PageProps } from "$fresh/server.ts";
-import ChatPage from "../../../islands/ChatPage.tsx";
-import { THEMES } from "../../../lib/prompts.ts";
+import StructuredChatPage from "../../../islands/StructuredChatPage.tsx";
+import { getTopic } from "../../../lib/content.ts";
+import { pickRandomScenario } from "../../../lib/pick-scenario.ts";
+import type { Difficulty } from "../../../lib/types.ts";
 
-export default function ChatRoute({ params }: PageProps) {
-  const themeId = params.theme_id;
-  const theme = THEMES[themeId];
+export default function TopicChatRoute({ url, params }: PageProps) {
+  const topicId = params.theme_id;
+  const difficulty = (url.searchParams.get("difficulty") ??
+    "intermediate") as Difficulty;
 
-  if (!theme) {
+  const topic = getTopic("cantonese", topicId);
+
+  if (!topic) {
     return (
       <div
         style={{ background: "var(--bg)", color: "var(--text)" }}
@@ -14,25 +19,35 @@ export default function ChatRoute({ params }: PageProps) {
       >
         <div class="text-center">
           <div style={{ color: "var(--text3)" }} class="text-lg mb-4">
-            Theme not found
+            Topic not found
           </div>
           <a
             href="/cantonese/themes"
             style={{ color: "var(--purple)" }}
             class="underline"
           >
-            Back to themes
+            Back to topics
           </a>
         </div>
       </div>
     );
   }
 
+  const subtopic =
+    topic.subtopics[Math.floor(Math.random() * topic.subtopics.length)];
+  const scenario = pickRandomScenario(subtopic);
+
   return (
-    <ChatPage
-      themeId={themeId}
-      emoji={theme.emoji}
-      themeName={theme.name}
+    <StructuredChatPage
+      languageId="cantonese"
+      topicId={topicId}
+      topicEmoji={topic.emoji}
+      subtopicId={subtopic.id}
+      subtopicName={subtopic.name}
+      scenarioId={scenario.id}
+      scenarioTitle={scenario.title}
+      scenarioContext={scenario.context}
+      difficulty={difficulty}
     />
   );
 }

@@ -1,3 +1,5 @@
+import { useEffect, useState } from "preact/hooks";
+import { SettingsModal } from "../components/SettingsModal.tsx";
 import { THEMES } from "../lib/prompts.ts";
 
 const THEME_ORDER = [
@@ -18,6 +20,13 @@ const THEME_ORDER = [
 ];
 
 export default function ThemesPage() {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [savedDifficulty, setSavedDifficulty] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSavedDifficulty(localStorage.getItem("st_difficulty"));
+  }, []);
+
   return (
     <div
       style={{
@@ -34,8 +43,8 @@ export default function ThemesPage() {
         }}
         class="sticky top-0 z-10 px-6 py-4"
       >
-        <div class="max-w-4xl mx-auto text-center">
-          <div class="flex items-center justify-center gap-3 mb-3">
+        <div class="max-w-4xl mx-auto">
+          <div class="flex items-center justify-center gap-3 mb-3 relative">
             <img
               src="/SmallTalkLogo.svg"
               alt="Small Talk"
@@ -49,27 +58,71 @@ export default function ThemesPage() {
             >
               Small Talk
             </span>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              title="Settings"
+              style={{
+                position: "absolute",
+                right: 0,
+                background: "var(--bg3)",
+                border: "1px solid var(--border)",
+                color: "var(--text2)",
+                cursor: "pointer",
+                width: "34px",
+                height: "34px",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "1rem",
+              }}
+            >
+              ⚙
+            </button>
           </div>
-          <div
-            style={{
-              background: "var(--bg3)",
-              color: "var(--accent)",
-              border: "1px solid var(--border2)",
-              display: "inline-block",
-            }}
-            class="text-xs font-medium px-3 py-1 rounded-full mb-3"
-          >
-            廣東話 · Cantonese
+          <div class="text-center">
+            <div
+              style={{
+                background: "var(--bg3)",
+                color: "var(--accent)",
+                border: "1px solid var(--border2)",
+                display: "inline-block",
+              }}
+              class="text-xs font-medium px-3 py-1 rounded-full mb-3"
+            >
+              廣東話 · Cantonese
+            </div>
+            <h1
+              style={{ color: "var(--text)" }}
+              class="text-2xl font-bold mb-1"
+            >
+              Choose a Topic
+            </h1>
+            <p style={{ color: "var(--text3)" }} class="text-sm">
+              {savedDifficulty
+                ? (
+                  <>
+                    Going straight to chat at{" "}
+                    <button
+                      onClick={() => setSettingsOpen(true)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--accent)",
+                        cursor: "pointer",
+                        padding: 0,
+                        textDecoration: "underline",
+                        font: "inherit",
+                        fontSize: "inherit",
+                      }}
+                    >
+                      {savedDifficulty} level
+                    </button>
+                  </>
+                )
+                : "Select a theme to start your conversation practice"}
+            </p>
           </div>
-          <h1
-            style={{ color: "var(--text)" }}
-            class="text-2xl font-bold mb-1"
-          >
-            Choose a Topic
-          </h1>
-          <p style={{ color: "var(--text3)" }} class="text-sm">
-            Select a theme to start your conversation practice
-          </p>
         </div>
       </header>
 
@@ -79,10 +132,13 @@ export default function ThemesPage() {
           {THEME_ORDER.map((id) => {
             const theme = THEMES[id];
             if (!theme) return null;
+            const href = savedDifficulty
+              ? `/cantonese/${id}/chat?difficulty=${savedDifficulty}`
+              : `/cantonese/${id}`;
             return (
               <a
                 key={id}
-                href={`/cantonese/${id}/chat`}
+                href={href}
                 style={{
                   background: "var(--bg3)",
                   border: "1px solid var(--border)",
@@ -123,6 +179,12 @@ export default function ThemesPage() {
           })}
         </div>
       </main>
+
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onDifficultyChange={(d) => setSavedDifficulty(d)}
+      />
     </div>
   );
 }
