@@ -423,11 +423,7 @@ function MessageBubble(
         }}
         class="rounded-xl overflow-hidden"
       >
-        <div
-          onClick={onCycleLang}
-          style={{ cursor: "pointer" }}
-          class="px-4 pt-3 pb-3"
-        >
+        <div class="px-4 pt-3 pb-3">
           <div
             style={{ color: "var(--text)" }}
             class="text-sm leading-relaxed whitespace-pre-wrap"
@@ -435,16 +431,18 @@ function MessageBubble(
             {displayText()}
           </div>
           <div class="flex justify-end mt-2">
-            <span
+            <button
+              onClick={onCycleLang}
               style={{
                 color: "var(--text3)",
                 border: "1px solid var(--border)",
                 background: "var(--bg3)",
+                cursor: "pointer",
               }}
               class="text-xs px-2 py-0.5 rounded-full select-none"
             >
               {LANG_LABELS[displayLang]} ↻
-            </span>
+            </button>
           </div>
         </div>
       </div>
