@@ -19,9 +19,20 @@ const THEME_ORDER = [
   "education",
 ];
 
-export default function ThemesPage() {
+const LANG_META: Record<string, { badge: string; label: string }> = {
+  hk: { badge: "廣東話 · Cantonese", label: "Cantonese" },
+  japanese: { badge: "日本語 · Japanese", label: "Japanese" },
+};
+
+interface ThemesPageProps {
+  languageId?: string;
+}
+
+export default function ThemesPage({ languageId = "hk" }: ThemesPageProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [savedDifficulty, setSavedDifficulty] = useState("intermediate");
+
+  const meta = LANG_META[languageId] ?? LANG_META.hk;
 
   useEffect(() => {
     const saved = localStorage.getItem("st_difficulty");
@@ -46,19 +57,29 @@ export default function ThemesPage() {
       >
         <div class="max-w-4xl mx-auto">
           <div class="flex items-center justify-center gap-3 mb-3 relative">
-            <img
-              src="/SmallTalkLogo.svg"
-              alt="Small Talk"
-              width="40"
-              height="40"
-              style={{ borderRadius: "10px" }}
-            />
-            <span
-              style={{ color: "var(--text)" }}
-              class="text-xl font-bold tracking-tight"
+            <a
+              href="/"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                textDecoration: "none",
+              }}
             >
-              Small Talk
-            </span>
+              <img
+                src="/SmallTalkLogo.svg"
+                alt="Small Talk"
+                width="40"
+                height="40"
+                style={{ borderRadius: "10px" }}
+              />
+              <span
+                style={{ color: "var(--text)" }}
+                class="text-xl font-bold tracking-tight"
+              >
+                Small Talk
+              </span>
+            </a>
             <button
               onClick={() => setSettingsOpen(true)}
               title="Settings"
@@ -91,7 +112,7 @@ export default function ThemesPage() {
               }}
               class="text-xs font-medium px-3 py-1 rounded-full mb-3"
             >
-              廣東話 · Cantonese
+              {meta.badge}
             </div>
             <h1
               style={{ color: "var(--text)" }}
@@ -112,7 +133,8 @@ export default function ThemesPage() {
           {THEME_ORDER.map((id) => {
             const theme = THEMES[id];
             if (!theme) return null;
-            const href = `/cantonese/${id}/chat?difficulty=${savedDifficulty}`;
+            const href =
+              `/${languageId}/${id}/chat?difficulty=${savedDifficulty}`;
             return (
               <a
                 key={id}
@@ -162,6 +184,7 @@ export default function ThemesPage() {
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
         onDifficultyChange={(d) => setSavedDifficulty(d)}
+        currentLanguage={languageId}
       />
     </div>
   );

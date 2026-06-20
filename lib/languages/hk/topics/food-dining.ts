@@ -1,6 +1,6 @@
 import type { Topic } from "../../../types.ts";
 
-export const FOOD_DINING_TOPIC: Topic = {
+export const HK_FOOD_DINING: Topic = {
   id: "food-dining",
   emoji: "🍜",
   name: "Food & Dining",

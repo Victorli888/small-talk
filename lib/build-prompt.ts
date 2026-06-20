@@ -1,6 +1,8 @@
-import { GLOBAL_PROMPT } from "./languages/cantonese/global-prompt.ts";
-import { GRADING_RULES } from "./languages/cantonese/grading-prompt.ts";
 import { DIFFICULTY_MODIFIERS } from "./difficulty.ts";
+import {
+  buildSuggestionsInstruction,
+  getLanguageConfig,
+} from "./languages/language-map.ts";
 import type {
   Difficulty,
   Scenario,
@@ -8,20 +10,14 @@ import type {
   Subtopic,
 } from "./types.ts";
 
-const SUGGESTIONS_INSTRUCTION = `SUGGESTED REPLIES:
-After every response (including your opening), output exactly 3 suggested replies the learner could say next. Progress from shorter/simpler to longer/more natural. Output Cantonese text only — no Jyutping or English inside the suggestions. Use this exact format:
-
-<suggestions>
-  <option>你好，我想check in。</option>
-  <option>你好！我預訂咗一個房間，姓李。</option>
-  <option>唔該晒！我係網上訂嘅，預訂號碼係1234，可唔可以幫我check in？</option>
-</suggestions>`;
-
 export function formatScenarioCard(
   _subtopic: Subtopic,
   scenario: Scenario,
   difficulty: Difficulty,
+  languageId = "hk",
 ): string {
+  const { suggestionsNote } = getLanguageConfig(languageId);
+
   const beats = scenario.beats
     .map((b, i) => {
       const speaker = b.speaker === "agent" ? "A (you)" : "B (learner)";
@@ -47,29 +43,37 @@ VOCABULARY: ${vocab}${grammar}
 
 ${DIFFICULTY_MODIFIERS[difficulty]}
 
-${SUGGESTIONS_INSTRUCTION}
+${buildSuggestionsInstruction(suggestionsNote)}
 
 Begin in character now as A. Do not announce the scenario or read out the beats. Start naturally at beat 1.`;
 }
 
-export function formatSessionStub(session: SessionContext): string {
+export function formatSessionStub(
+  session: SessionContext,
+  languageId = "hk",
+): string {
+  const { suggestionsNote } = getLanguageConfig(languageId);
+
   const topicLabel = session.topicId.charAt(0).toUpperCase() +
     session.topicId.slice(1);
   const diff = session.difficulty.charAt(0).toUpperCase() +
     session.difficulty.slice(1);
+
   return `Session: ${topicLabel} > ${session.subtopicName} > ${session.scenarioTitle} | ${diff}
 You are ${session.agentRole} (A). Learner is B.
 
-${SUGGESTIONS_INSTRUCTION}`;
+${buildSuggestionsInstruction(suggestionsNote)}`;
 }
 
 export function buildGradingPrompt(
   session: SessionContext,
-  priorAiCantonese: string,
+  priorAiMessage: string,
   userMessage: string,
 ): string {
+  const { gradingRules, label } = getLanguageConfig(session.languageId);
   const diff = DIFFICULTY_MODIFIERS[session.difficulty];
-  return `You are grading a learner's Cantonese response in a role-play scenario. Output ONLY the grade block — do not continue the conversation.
+
+  return `You are grading a learner's ${label} response in a role-play scenario. Output ONLY the grade block — do not continue the conversation.
 
 Scenario: ${session.scenarioTitle}
 Setting: ${session.setting}
@@ -77,10 +81,10 @@ Role you were playing: ${session.agentRole}
 
 ${diff}
 
-What you (the AI) last said in Cantonese: ${priorAiCantonese}
+What you (the AI) last said in ${label}: ${priorAiMessage}
 What the learner replied: ${userMessage}
 
-${GRADING_RULES}
+${gradingRules}
 
 Output ONLY the <grade>…</grade> block. No other text, no conversation continuation.`;
 }
@@ -94,13 +98,12 @@ interface AssembleOptions {
 }
 
 export function assembleSystemPrompt(options: AssembleOptions): string {
-  const { session, init, subtopic, scenario } = options;
+  const { languageId, session, init, subtopic, scenario } = options;
+  const { globalPrompt } = getLanguageConfig(languageId);
+
   if (init) {
-    return (
-      GLOBAL_PROMPT +
-      "\n\n" +
-      formatScenarioCard(subtopic, scenario, session.difficulty)
-    );
+    return globalPrompt + "\n\n" +
+      formatScenarioCard(subtopic, scenario, session.difficulty, languageId);
   }
-  return GLOBAL_PROMPT + "\n\n" + formatSessionStub(session);
+  return globalPrompt + "\n\n" + formatSessionStub(session, languageId);
 }

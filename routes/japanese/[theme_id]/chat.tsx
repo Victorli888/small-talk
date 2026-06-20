@@ -4,12 +4,12 @@ import { getTopic } from "../../../lib/content.ts";
 import { pickRandomScenario } from "../../../lib/pick-scenario.ts";
 import type { Difficulty } from "../../../lib/types.ts";
 
-export default function TopicChatRoute({ url, params }: PageProps) {
+export default function JapaneseTopicChatRoute({ url, params }: PageProps) {
   const topicId = params.theme_id;
   const difficulty = (url.searchParams.get("difficulty") ??
     "intermediate") as Difficulty;
 
-  const topic = getTopic("cantonese", topicId);
+  const topic = getTopic("japanese", topicId);
 
   if (!topic) {
     return (
@@ -22,7 +22,7 @@ export default function TopicChatRoute({ url, params }: PageProps) {
             Topic not found
           </div>
           <a
-            href="/cantonese/themes"
+            href="/japanese/themes"
             style={{ color: "var(--purple)" }}
             class="underline"
           >
@@ -39,7 +39,7 @@ export default function TopicChatRoute({ url, params }: PageProps) {
 
   return (
     <StructuredChatPage
-      languageId="cantonese"
+      languageId="japanese"
       topicId={topicId}
       topicEmoji={topic.emoji}
       subtopicId={subtopic.id}

@@ -7,8 +7,8 @@ const DIFFICULTIES = [
 ] as const;
 
 const LANGUAGES = [
-  { id: "cantonese", label: "Cantonese", native: "廣東話", available: true },
-  { id: "japanese", label: "Japanese", native: "日本語", available: false },
+  { id: "hk", label: "Cantonese", native: "廣東話", available: true },
+  { id: "japanese", label: "Japanese", native: "日本語", available: true },
   { id: "mandarin", label: "Mandarin", native: "普通話", available: false },
 ] as const;
 
@@ -18,10 +18,12 @@ interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onDifficultyChange?: (d: string) => void;
+  currentLanguage?: string;
 }
 
 export function SettingsModal(
-  { isOpen, onClose, onDifficultyChange }: SettingsModalProps,
+  { isOpen, onClose, onDifficultyChange, currentLanguage = "hk" }:
+    SettingsModalProps,
 ) {
   const [difficulty, setDifficulty] = useState("intermediate");
 
@@ -32,7 +34,6 @@ export function SettingsModal(
 
   useEffect(() => {
     if (!isOpen) return;
-    // re-sync in case another component changed it
     const saved = localStorage.getItem(DIFF_KEY);
     if (saved) setDifficulty(saved);
 
@@ -51,6 +52,11 @@ export function SettingsModal(
     setDifficulty(d);
     localStorage.setItem(DIFF_KEY, d);
     onDifficultyChange?.(d);
+  }
+
+  function handleLanguageSwitch(langId: string) {
+    if (langId === currentLanguage) return;
+    globalThis.location.href = `/${langId}/themes`;
   }
 
   if (!isOpen) return null;
@@ -121,77 +127,68 @@ export function SettingsModal(
             Learning Language
           </div>
           <div class="flex flex-col gap-1.5">
-            {LANGUAGES.map((lang) => (
-              <div
-                key={lang.id}
-                style={{
-                  background: lang.id === "cantonese"
-                    ? "var(--bg4)"
-                    : "var(--bg3)",
-                  border: lang.id === "cantonese"
-                    ? "1px solid var(--border2)"
-                    : "1px solid var(--border)",
-                  borderRadius: "10px",
-                  padding: "0.625rem 0.875rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.625rem",
-                  opacity: lang.available ? 1 : 0.45,
-                }}
-              >
-                {lang.id === "cantonese" && (
-                  <span
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      background: "var(--purple)",
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
-                {lang.id !== "cantonese" && (
-                  <span
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      background: "var(--border2)",
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
-                <span
+            {LANGUAGES.map((lang) => {
+              const isActive = lang.id === currentLanguage;
+              return (
+                <div
+                  key={lang.id}
+                  onClick={() =>
+                    lang.available && handleLanguageSwitch(lang.id)}
                   style={{
-                    color: lang.available ? "var(--text)" : "var(--text3)",
+                    background: isActive ? "var(--bg4)" : "var(--bg3)",
+                    border: isActive
+                      ? "1px solid var(--border2)"
+                      : "1px solid var(--border)",
+                    borderRadius: "10px",
+                    padding: "0.625rem 0.875rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.625rem",
+                    opacity: lang.available ? 1 : 0.45,
+                    cursor: lang.available && !isActive ? "pointer" : "default",
                   }}
-                  class="text-sm font-semibold"
                 >
-                  {lang.native}
-                </span>
-                <span
-                  style={{ color: "var(--text3)" }}
-                  class="text-xs"
-                >
-                  {lang.label}
-                </span>
-                {!lang.available && (
                   <span
                     style={{
-                      marginLeft: "auto",
-                      color: "var(--text3)",
-                      background: "var(--bg3)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "20px",
-                      padding: "1px 8px",
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      background: isActive ? "var(--purple)" : "var(--border2)",
+                      flexShrink: 0,
                     }}
+                  />
+                  <span
+                    style={{
+                      color: lang.available ? "var(--text)" : "var(--text3)",
+                    }}
+                    class="text-sm font-semibold"
+                  >
+                    {lang.native}
+                  </span>
+                  <span
+                    style={{ color: "var(--text3)" }}
                     class="text-xs"
                   >
-                    Soon
+                    {lang.label}
                   </span>
-                )}
-              </div>
-            ))}
+                  {!lang.available && (
+                    <span
+                      style={{
+                        marginLeft: "auto",
+                        color: "var(--text3)",
+                        background: "var(--bg3)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "20px",
+                        padding: "1px 8px",
+                      }}
+                      class="text-xs"
+                    >
+                      Soon
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 

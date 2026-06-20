@@ -73,7 +73,7 @@ export const handler: Handlers = {
     }
 
     const {
-      languageId = "cantonese",
+      languageId = "hk",
       topicId,
       subtopicId,
       scenarioId,
@@ -86,7 +86,7 @@ export const handler: Handlers = {
       priorAiMessage,
     } = body;
 
-    if (!topicId || !isStructuredTopic(topicId)) {
+    if (!topicId || !isStructuredTopic(topicId, languageId)) {
       return new Response(
         JSON.stringify({ error: `Unknown topic "${topicId}"` }),
         { status: 400, headers: { "Content-Type": "application/json" } },

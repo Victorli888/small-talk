@@ -101,3 +101,8 @@ textarea:focus {
   background: var(--bg4);
   border-radius: 3px;
 }
+
+.lang-card:hover {
+  border-color: var(--purple);
+  background: var(--bg3);
+}

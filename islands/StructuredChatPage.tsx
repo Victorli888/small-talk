@@ -5,8 +5,8 @@ import type { Difficulty, SessionContext } from "../lib/types.ts";
 // --- types ---
 
 interface ParsedResponse {
-  cantonese: string | null;
-  jyutping: string | null;
+  primary: string | null;
+  phonetic: string | null;
   english: string | null;
   suggestions: string[];
 }
@@ -16,7 +16,7 @@ interface GradeResult {
   label: string | null;
   summary: string | null;
   improved: string | null;
-  jyutping_improved: string | null;
+  phonetic_improved: string | null;
   english_improved: string | null;
   explanation: string | null;
 }
@@ -28,7 +28,6 @@ interface UIMessage {
   role: "user" | "ai";
   raw: string;
   parsed: ParsedResponse | null;
-  // grading — only used for user messages
   gradeStatus: GradeStatus;
   gradeResult: GradeResult | null;
   hintOpen: boolean;
@@ -40,7 +39,7 @@ interface ApiMessage {
   content: string;
 }
 
-type DisplayLang = "cantonese" | "jyutping" | "english";
+type DisplayLang = "primary" | "phonetic" | "english";
 
 export interface StructuredChatProps {
   languageId: string;
@@ -54,9 +53,49 @@ export interface StructuredChatProps {
   difficulty: Difficulty;
 }
 
+// --- per-language display config (no server-side imports needed) ---
+
+interface DisplayConfig {
+  primaryTag: string;
+  phoneticTag: string;
+  phoneticImprovedTag: string;
+  primaryLabel: string;
+  phoneticLabel: string;
+  teacherLabel: string;
+  inputPlaceholder: string;
+  themesHref: string;
+}
+
+function getDisplayConfig(languageId: string): DisplayConfig {
+  if (languageId === "japanese") {
+    return {
+      primaryTag: "japanese",
+      phoneticTag: "romaji",
+      phoneticImprovedTag: "romaji_improved",
+      primaryLabel: "漢字",
+      phoneticLabel: "Romaji",
+      teacherLabel: "先生",
+      inputPlaceholder:
+        "Type in Japanese… (Enter to send, Shift+Enter for new line)",
+      themesHref: "/japanese/themes",
+    };
+  }
+  return {
+    primaryTag: "cantonese",
+    phoneticTag: "jyutping",
+    phoneticImprovedTag: "jyutping_improved",
+    primaryLabel: "漢字",
+    phoneticLabel: "Jyutping",
+    teacherLabel: "老師",
+    inputPlaceholder:
+      "Type in Cantonese… (Enter to send, Shift+Enter for new line)",
+    themesHref: "/hk/themes",
+  };
+}
+
 // --- helpers ---
 
-function parseResponse(text: string): ParsedResponse {
+function parseResponse(text: string, config: DisplayConfig): ParsedResponse {
   const get = (tag: string): string | null => {
     const match = text.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
     return match ? match[1].trim() : null;
@@ -71,14 +110,14 @@ function parseResponse(text: string): ParsedResponse {
     }
   }
   return {
-    cantonese: get("cantonese"),
-    jyutping: get("jyutping"),
+    primary: get(config.primaryTag),
+    phonetic: get(config.phoneticTag),
     english: get("english"),
     suggestions,
   };
 }
 
-function parseGradeResponse(text: string): GradeResult {
+function parseGradeResponse(text: string, config: DisplayConfig): GradeResult {
   const get = (tag: string): string | null => {
     const match = text.match(new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`));
     return match ? match[1].trim() : null;
@@ -88,7 +127,7 @@ function parseGradeResponse(text: string): GradeResult {
     label: get("label"),
     summary: get("summary"),
     improved: get("improved"),
-    jyutping_improved: get("jyutping_improved"),
+    phonetic_improved: get(config.phoneticImprovedTag),
     english_improved: get("english_improved"),
     explanation: get("explanation"),
   };
@@ -120,25 +159,19 @@ function findLastIndex<T>(
   return -1;
 }
 
-const LANG_LABELS: Record<DisplayLang, string> = {
-  cantonese: "漢字",
-  jyutping: "Jyutping",
-  english: "EN",
-};
-
 const LANG_CYCLE: Record<DisplayLang, DisplayLang> = {
-  cantonese: "jyutping",
-  jyutping: "english",
-  english: "cantonese",
+  primary: "phonetic",
+  phonetic: "english",
+  english: "primary",
 };
 
 // --- sub-components ---
 
-function TypingIndicator() {
+function TypingIndicator({ teacherLabel }: { teacherLabel: string }) {
   return (
     <div class="flex flex-col items-start mb-4">
       <span style={{ color: "var(--text3)" }} class="text-xs mb-1 ml-1">
-        老師
+        {teacherLabel}
       </span>
       <div
         style={{
@@ -166,10 +199,10 @@ interface HintBoxProps {
 }
 
 function HintBox({ grade, open, displayLang, onUseThis }: HintBoxProps) {
-  const improvedText = displayLang === "cantonese"
+  const improvedText = displayLang === "primary"
     ? grade.improved
-    : displayLang === "jyutping"
-    ? grade.jyutping_improved
+    : displayLang === "phonetic"
+    ? grade.phonetic_improved
     : grade.english_improved;
 
   return (
@@ -241,6 +274,7 @@ function GradeBadge({ score, label, summary }: GradeBadgeProps) {
 interface MessageBubbleProps {
   msg: UIMessage;
   canGrade: boolean;
+  config: DisplayConfig;
   onToggleHint: () => void;
   onCycleLang: () => void;
   onUseThis: (improved: string) => void;
@@ -248,20 +282,26 @@ interface MessageBubbleProps {
 }
 
 function MessageBubble(
-  { msg, canGrade, onToggleHint, onCycleLang, onUseThis, onGrade }:
+  { msg, canGrade, config, onToggleHint, onCycleLang, onUseThis, onGrade }:
     MessageBubbleProps,
 ) {
   const isUser = msg.role === "user";
   const displayLang = msg.displayLang;
 
+  const LANG_LABELS: Record<DisplayLang, string> = {
+    primary: config.primaryLabel,
+    phonetic: config.phoneticLabel,
+    english: "EN",
+  };
+
   const displayText = () => {
     if (isUser) return msg.raw;
     if (!msg.parsed) return msg.raw;
     switch (displayLang) {
-      case "cantonese":
-        return msg.parsed.cantonese ?? msg.raw;
-      case "jyutping":
-        return msg.parsed.jyutping ?? msg.raw;
+      case "primary":
+        return msg.parsed.primary ?? msg.raw;
+      case "phonetic":
+        return msg.parsed.phonetic ?? msg.raw;
       case "english":
         return msg.parsed.english ?? msg.raw;
     }
@@ -372,7 +412,7 @@ function MessageBubble(
   return (
     <div class="flex flex-col items-start mb-4" style={{ maxWidth: "82%" }}>
       <span style={{ color: "var(--text3)" }} class="text-xs mb-1 ml-1">
-        老師
+        {config.teacherLabel}
       </span>
       <div
         style={{
@@ -519,6 +559,8 @@ export default function StructuredChatPage(
     difficulty,
   }: StructuredChatProps,
 ) {
+  const config = getDisplayConfig(languageId);
+
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [apiHistory, setApiHistory] = useState<ApiMessage[]>([]);
   const [session, setSession] = useState<SessionContext | null>(null);
@@ -545,11 +587,11 @@ export default function StructuredChatPage(
       id: uid(),
       role: "ai",
       raw: rawText,
-      parsed: parseResponse(rawText),
+      parsed: parseResponse(rawText, config),
       gradeStatus: "idle",
       gradeResult: null,
       hintOpen: false,
-      displayLang: "cantonese",
+      displayLang: "primary",
     };
   }
 
@@ -562,7 +604,7 @@ export default function StructuredChatPage(
       gradeStatus: "idle",
       gradeResult: null,
       hintOpen: false,
-      displayLang: "cantonese",
+      displayLang: "primary",
     };
   }
 
@@ -649,13 +691,11 @@ export default function StructuredChatPage(
     if (msgIdx === -1) return;
     const userMsg = messages[msgIdx];
 
-    // Find the AI message immediately before this user message
     const priorAiMsg = messages
       .slice(0, msgIdx)
       .reverse()
       .find((m) => m.role === "ai");
-    const priorAiCantonese = priorAiMsg?.parsed?.cantonese ?? priorAiMsg?.raw ??
-      "";
+    const priorAiPrimary = priorAiMsg?.parsed?.primary ?? priorAiMsg?.raw ?? "";
 
     setMessages((prev) =>
       prev.map((m) =>
@@ -675,7 +715,7 @@ export default function StructuredChatPage(
           session,
           messages: [],
           userMessage: userMsg.raw,
-          priorAiMessage: priorAiCantonese,
+          priorAiMessage: priorAiPrimary,
         }),
       });
 
@@ -690,7 +730,7 @@ export default function StructuredChatPage(
       }
 
       const rawText: string = data.content?.[0]?.text ?? "";
-      const gradeResult = parseGradeResponse(rawText);
+      const gradeResult = parseGradeResponse(rawText, config);
 
       setMessages((prev) =>
         prev.map((m) =>
@@ -802,10 +842,9 @@ export default function StructuredChatPage(
     if (exchanges > 2) {
       if (!globalThis.confirm("Leave this conversation?")) return;
     }
-    globalThis.location.href = "/cantonese/themes";
+    globalThis.location.href = config.themesHref;
   }
 
-  // Show suggestions from the last AI message (if user hasn't started typing)
   const lastAiMsg = [...messages].reverse().find((m) => m.role === "ai");
   const currentSuggestions = !loading && lastAiMsg?.parsed?.suggestions?.length
     ? lastAiMsg.parsed.suggestions
@@ -910,7 +949,6 @@ export default function StructuredChatPage(
 
       {/* Messages */}
       <div class="flex-1 overflow-y-auto px-4 pt-4 pb-2">
-        {/* Context card — always shown at top */}
         <ContextCard
           subtopicName={subtopicName}
           scenarioTitle={scenarioTitle}
@@ -923,13 +961,14 @@ export default function StructuredChatPage(
             key={msg.id}
             msg={msg}
             canGrade={!!session && !loading}
+            config={config}
             onToggleHint={() => handleToggleHint(msg.id)}
             onCycleLang={() => handleCycleLang(msg.id)}
             onUseThis={handleUseThis}
             onGrade={() => handleGrade(msg.id)}
           />
         ))}
-        {loading && <TypingIndicator />}
+        {loading && <TypingIndicator teacherLabel={config.teacherLabel} />}
         {error && (
           <div
             style={{
@@ -960,6 +999,7 @@ export default function StructuredChatPage(
       <SettingsModal
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
+        currentLanguage={languageId}
       />
 
       {/* Input area */}
@@ -970,20 +1010,18 @@ export default function StructuredChatPage(
         }}
         class="flex-shrink-0 px-4 pt-3 pb-4"
       >
-        {/* Suggestion chips */}
         <SuggestionChips
           suggestions={currentSuggestions}
           onSelect={handleSelectSuggestion}
         />
 
-        {/* Text input row */}
         <div class="flex gap-2 items-end">
           <textarea
             ref={textareaRef}
             value={input}
             onInput={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Type in Cantonese… (Enter to send, Shift+Enter for new line)"
+            placeholder={config.inputPlaceholder}
             rows={1}
             style={{
               background: "var(--bg3)",

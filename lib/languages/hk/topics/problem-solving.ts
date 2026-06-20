@@ -1,6 +1,6 @@
 import type { Topic } from "../../../types.ts";
 
-export const PROBLEM_SOLVING_TOPIC: Topic = {
+export const HK_PROBLEM_SOLVING: Topic = {
   id: "problem-solving",
   emoji: "🔧",
   name: "Problem-Solving",

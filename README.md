@@ -48,7 +48,8 @@ tone, vocabulary, and phrasing as you go.
 
 ## Usage
 
-1. The app redirects to `/cantonese/themes` — pick a conversation theme.
+1. Choose a language on the home page, then pick a conversation theme at
+   `/hk/themes` or `/japanese/themes`.
 2. A chat session opens; type your Cantonese and the AI responds with coaching.
 
 ## Contributing

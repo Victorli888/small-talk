@@ -1,6 +1,6 @@
 import type { Topic } from "../../../types.ts";
 
-export const SMALL_TALK_TOPIC: Topic = {
+export const HK_SMALL_TALK: Topic = {
   id: "small-talk",
   emoji: "💬",
   name: "Small Talk",

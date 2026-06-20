@@ -1,0 +1,14 @@
+export { HK_DAILY_ROUTINES } from "./daily-routines.ts";
+export { HK_DIRECTIONS } from "./directions.ts";
+export { HK_EDUCATION } from "./education.ts";
+export { HK_FOOD_DINING } from "./food-dining.ts";
+export { HK_HEALTH } from "./health.ts";
+export { HK_LEISURE } from "./leisure.ts";
+export { HK_PERSONAL_IDENTITY } from "./personal-identity.ts";
+export { HK_PROBLEM_SOLVING } from "./problem-solving.ts";
+export { HK_RELATIONSHIPS } from "./relationships.ts";
+export { HK_SHOPPING } from "./shopping.ts";
+export { HK_SMALL_TALK } from "./small-talk.ts";
+export { HK_TECHNOLOGY } from "./technology.ts";
+export { HK_TRAVEL } from "./travel.ts";
+export { HK_WORK } from "./work.ts";

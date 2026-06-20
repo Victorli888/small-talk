@@ -1,6 +1,6 @@
 import type { Topic } from "../../../types.ts";
 
-export const DAILY_ROUTINES_TOPIC: Topic = {
+export const HK_DAILY_ROUTINES: Topic = {
   id: "daily-routines",
   emoji: "🌅",
   name: "Daily Routines",
