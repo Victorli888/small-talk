@@ -802,7 +802,7 @@ export default function StructuredChatPage(
     if (exchanges > 2) {
       if (!globalThis.confirm("Leave this conversation?")) return;
     }
-    globalThis.location.href = `/cantonese/${topicId}`;
+    globalThis.location.href = "/cantonese/themes";
   }
 
   // Show suggestions from the last AI message (if user hasn't started typing)

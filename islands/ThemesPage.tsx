@@ -21,10 +21,11 @@ const THEME_ORDER = [
 
 export default function ThemesPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [savedDifficulty, setSavedDifficulty] = useState<string | null>(null);
+  const [savedDifficulty, setSavedDifficulty] = useState("intermediate");
 
   useEffect(() => {
-    setSavedDifficulty(localStorage.getItem("st_difficulty"));
+    const saved = localStorage.getItem("st_difficulty");
+    if (saved) setSavedDifficulty(saved);
   }, []);
 
   return (
@@ -99,28 +100,7 @@ export default function ThemesPage() {
               Choose a Topic
             </h1>
             <p style={{ color: "var(--text3)" }} class="text-sm">
-              {savedDifficulty
-                ? (
-                  <>
-                    Going straight to chat at{" "}
-                    <button
-                      onClick={() => setSettingsOpen(true)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        color: "var(--accent)",
-                        cursor: "pointer",
-                        padding: 0,
-                        textDecoration: "underline",
-                        font: "inherit",
-                        fontSize: "inherit",
-                      }}
-                    >
-                      {savedDifficulty} level
-                    </button>
-                  </>
-                )
-                : "Select a theme to start your conversation practice"}
+              Select a theme to start your conversation practice
             </p>
           </div>
         </div>
@@ -132,9 +112,7 @@ export default function ThemesPage() {
           {THEME_ORDER.map((id) => {
             const theme = THEMES[id];
             if (!theme) return null;
-            const href = savedDifficulty
-              ? `/cantonese/${id}/chat?difficulty=${savedDifficulty}`
-              : `/cantonese/${id}`;
+            const href = `/cantonese/${id}/chat?difficulty=${savedDifficulty}`;
             return (
               <a
                 key={id}

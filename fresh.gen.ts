@@ -6,7 +6,6 @@ import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_chat from "./routes/api/chat.ts";
 import * as $cantonese_theme_id_chat from "./routes/cantonese/[theme_id]/chat.tsx";
-import * as $cantonese_theme_id_index from "./routes/cantonese/[theme_id]/index.tsx";
 import * as $cantonese_themes from "./routes/cantonese/themes.tsx";
 import * as $index from "./routes/index.tsx";
 import * as $StructuredChatPage from "./islands/StructuredChatPage.tsx";
@@ -19,7 +18,6 @@ const manifest = {
     "./routes/_app.tsx": $_app,
     "./routes/api/chat.ts": $api_chat,
     "./routes/cantonese/[theme_id]/chat.tsx": $cantonese_theme_id_chat,
-    "./routes/cantonese/[theme_id]/index.tsx": $cantonese_theme_id_index,
     "./routes/cantonese/themes.tsx": $cantonese_themes,
     "./routes/index.tsx": $index,
   },
