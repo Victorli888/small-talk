@@ -5,6 +5,7 @@
 import * as $_404 from "./routes/_404.tsx";
 import * as $_app from "./routes/_app.tsx";
 import * as $api_chat from "./routes/api/chat.ts";
+import * as $api_scenario from "./routes/api/scenario.ts";
 import * as $hk_theme_id_chat from "./routes/hk/[theme_id]/chat.tsx";
 import * as $hk_themes from "./routes/hk/themes.tsx";
 import * as $index from "./routes/index.tsx";
@@ -19,6 +20,7 @@ const manifest = {
     "./routes/_404.tsx": $_404,
     "./routes/_app.tsx": $_app,
     "./routes/api/chat.ts": $api_chat,
+    "./routes/api/scenario.ts": $api_scenario,
     "./routes/hk/[theme_id]/chat.tsx": $hk_theme_id_chat,
     "./routes/hk/themes.tsx": $hk_themes,
     "./routes/index.tsx": $index,

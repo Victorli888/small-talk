@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import { SettingsModal } from "../components/SettingsModal.tsx";
+import { NextScenarioCard } from "../components/NextScenarioCard.tsx";
+import type { NextScenario } from "../components/NextScenarioCard.tsx";
 import type { Difficulty, SessionContext } from "../lib/types.ts";
 
 // --- types ---
@@ -9,7 +11,9 @@ interface ParsedResponse {
   phonetic: string | null;
   english: string | null;
   suggestions: string[];
+  done: boolean;
 }
+
 
 interface GradeResult {
   score: string | null;
@@ -114,6 +118,7 @@ function parseResponse(text: string, config: DisplayConfig): ParsedResponse {
     phonetic: get(config.phoneticTag),
     english: get("english"),
     suggestions,
+    done: /<done\s*\/>/.test(text),
   };
 }
 
@@ -559,6 +564,13 @@ export default function StructuredChatPage(
 ) {
   const config = getDisplayConfig(languageId);
 
+  const [activeCtx, setActiveCtx] = useState<NextScenario>({
+    subtopicId,
+    subtopicName,
+    scenarioId,
+    scenarioTitle,
+    scenarioContext,
+  });
   const [messages, setMessages] = useState<UIMessage[]>([]);
   const [apiHistory, setApiHistory] = useState<ApiMessage[]>([]);
   const [session, setSession] = useState<SessionContext | null>(null);
@@ -566,6 +578,8 @@ export default function StructuredChatPage(
   const [error, setError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [conversationDone, setConversationDone] = useState(false);
+  const [nextScenario, setNextScenario] = useState<NextScenario | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -577,7 +591,7 @@ export default function StructuredChatPage(
   }, [messages, loading]);
 
   useEffect(() => {
-    callInit();
+    callInit(activeCtx);
   }, []);
 
   function makeAiMsg(rawText: string): UIMessage {
@@ -606,7 +620,7 @@ export default function StructuredChatPage(
     };
   }
 
-  async function callInit() {
+  async function callInit(ctx: NextScenario = activeCtx) {
     setLoading(true);
     setError(null);
     try {
@@ -616,8 +630,8 @@ export default function StructuredChatPage(
         body: JSON.stringify({
           languageId,
           topicId,
-          subtopicId,
-          scenarioId,
+          subtopicId: ctx.subtopicId,
+          scenarioId: ctx.scenarioId,
           difficulty,
           init: true,
           messages: [],
@@ -658,7 +672,7 @@ export default function StructuredChatPage(
         body: JSON.stringify({
           languageId,
           topicId,
-          subtopicId,
+          subtopicId: activeCtx.subtopicId,
           difficulty,
           init: false,
           session,
@@ -673,8 +687,19 @@ export default function StructuredChatPage(
       }
 
       const rawText: string = data.content?.[0]?.text ?? "";
-      setMessages([...currentMessages, makeAiMsg(rawText)]);
+      const aiMsg = makeAiMsg(rawText);
+      setMessages([...currentMessages, aiMsg]);
       setApiHistory([...newHistory, { role: "assistant", content: rawText }]);
+
+      if (aiMsg.parsed?.done) {
+        setConversationDone(true);
+        fetch(
+          `/api/scenario?languageId=${languageId}&topicId=${topicId}&excludeScenarioId=${activeCtx.scenarioId}`,
+        )
+          .then((r) => r.json())
+          .then((next: NextScenario) => setNextScenario(next))
+          .catch(() => {});
+      }
     } catch {
       setError("Something went wrong — please try again");
     } finally {
@@ -708,7 +733,7 @@ export default function StructuredChatPage(
         body: JSON.stringify({
           languageId,
           topicId,
-          subtopicId,
+          subtopicId: activeCtx.subtopicId,
           mode: "grade",
           session,
           messages: [],
@@ -811,6 +836,18 @@ export default function StructuredChatPage(
     await callFollowUp(newHistory, newMessages);
   }
 
+  function handleNextScenario() {
+    if (!nextScenario) return;
+    setActiveCtx(nextScenario);
+    setMessages([]);
+    setApiHistory([]);
+    setSession(null);
+    setConversationDone(false);
+    setNextScenario(null);
+    setInput("");
+    callInit(nextScenario);
+  }
+
   function handleSelectSuggestion(text: string) {
     setInput(text);
     textareaRef.current?.focus();
@@ -900,7 +937,7 @@ export default function StructuredChatPage(
             style={{ color: "var(--text)" }}
             class="font-semibold text-sm truncate"
           >
-            {subtopicName}
+            {activeCtx.subtopicName}
           </span>
           <span
             style={{
@@ -948,9 +985,9 @@ export default function StructuredChatPage(
       {/* Messages */}
       <div class="flex-1 overflow-y-auto px-4 pt-4 pb-2">
         <ContextCard
-          subtopicName={subtopicName}
-          scenarioTitle={scenarioTitle}
-          scenarioContext={scenarioContext}
+          subtopicName={activeCtx.subtopicName}
+          scenarioTitle={activeCtx.scenarioTitle}
+          scenarioContext={activeCtx.scenarioContext}
           difficulty={difficulty}
         />
 
@@ -967,6 +1004,11 @@ export default function StructuredChatPage(
           />
         ))}
         {loading && <TypingIndicator teacherLabel={config.teacherLabel} />}
+
+        {conversationDone && (
+          <NextScenarioCard next={nextScenario} onStart={handleNextScenario} />
+        )}
+
         {error && (
           <div
             style={{
